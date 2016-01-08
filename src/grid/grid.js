@@ -1,7 +1,7 @@
 import {inject, children, customElement, bindable} from 'aurelia-framework';
 import {WidgetBase} from '../common/widget-base';
 import {generateBindables} from '../common/decorators';
-import {PDF} from '../pdf/pdf'; //eslint-disable-line no-unused-vars
+//import {PDF} from '../pdf/pdf'; //eslint-disable-line no-unused-vars
 import 'kendo-ui/js/kendo.data.signalr.min';
 import 'kendo-ui/js/kendo.filtercell.min';
 import 'kendo-ui/js/kendo.grid.min';
