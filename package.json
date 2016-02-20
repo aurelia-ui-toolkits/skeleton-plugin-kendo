@@ -1,8 +1,8 @@
 {
   "name": "aurelia-kendoui-plugin",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "registry": "github",
-  "description": "A set of Telerik KendoUI wrappers for Aurelia developers to easily use KendoUI components in their Aurelia application.",
+  "description": "A set of Telerik KendoUI wrappers used in Aurelia-KendoUI-bridge tutorials",
   "keywords": [
     "aurelia",
     "plugin",
