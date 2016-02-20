@@ -889,8 +889,8 @@ export class WidgetBase {
   }
 }
 
-//eslint-disable-line no-unused-vars
-@customElement(`${constants.elementPrefix}grid`)
+// //eslint-disable-line no-unused-vars
+// // @customElement(`${constants.elementPrefix}grid`)
 @generateBindables('kendoGrid')
 @inject(Element, WidgetBase, ViewResources, OptionsBuilder)
 export class Grid  {
@@ -962,38 +962,6 @@ export class Col {
   }
 }
 
-@customAttribute(`${constants.attributePrefix}tabstrip`)
-@generateBindables('kendoTabStrip')
-@inject(Element, WidgetBase)
-export class TabStrip {
-
-  @bindable options = {};
-
-  constructor(element, widgetBase) {
-    this.element = element;
-    this.widgetBase = widgetBase
-                        .control('kendoTabStrip')
-                        .linkViewModel(this);
-  }
-
-  bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  }
-
-  recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  }
-
-  detached() {
-    this.widgetBase.destroy(this.kWidget);
-  }
-}
-
 export class kendoToStringValueConverter {
   toView(value, format, language) {
     return kendo.toString(value, format, language);
@@ -1035,5 +1003,37 @@ export class kendoFormatValueConverter {
     params.unshift(value);
 
     return kendo.format.apply(this, params);
+  }
+}
+
+@customAttribute(`${constants.attributePrefix}tabstrip`)
+@generateBindables('kendoTabStrip')
+@inject(Element, WidgetBase)
+export class TabStrip {
+
+  @bindable options = {};
+
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoTabStrip')
+                        .linkViewModel(this);
+  }
+
+  bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  }
+
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  }
+
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
   }
 }

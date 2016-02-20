@@ -309,7 +309,8 @@ declare module 'aurelia-kendoui-plugin' {
     destroy(widget: any): any;
   }
   
-  // eslint-disable-line no-unused-vars
+  //  //eslint-disable-line no-unused-vars
+  //  // @customElement(`${constants.elementPrefix}grid`)
   export class Grid {
     columns: any;
     options: any;
@@ -325,13 +326,6 @@ declare module 'aurelia-kendoui-plugin' {
   export class Col {
     templates: any;
     bind(): any;
-  }
-  export class TabStrip {
-    options: any;
-    constructor(element: any, widgetBase: any);
-    bind(ctx: any): any;
-    recreate(): any;
-    detached(): any;
   }
   export class kendoToStringValueConverter {
     toView(value: any, format: any, language: any): any;
@@ -353,5 +347,12 @@ declare module 'aurelia-kendoui-plugin' {
   }
   export class kendoFormatValueConverter {
     toView(value: any, ...params: any[]): any;
+  }
+  export class TabStrip {
+    options: any;
+    constructor(element: any, widgetBase: any);
+    bind(ctx: any): any;
+    recreate(): any;
+    detached(): any;
   }
 }

@@ -20,12 +20,6 @@ var _commonConstants = require('../common/constants');
 
 var _commonOptionsBuilder = require('../common/options-builder');
 
-var _pdfPdf = require('../pdf/pdf');
-
-require('kendo.data.signalr.min');
-
-require('kendo.filtercell.min');
-
 require('kendo.grid.min');
 
 var Grid = (function () {
