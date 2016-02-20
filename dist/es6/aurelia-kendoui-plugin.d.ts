@@ -10,6 +10,7 @@ declare module 'aurelia-kendoui-plugin' {
   import 'kendo.data.signalr.min';
   import 'kendo.filtercell.min';
   import 'kendo.grid.min';
+  import 'kendo.tabstrip.min';
   import { Aurelia }  from 'aurelia-framework';
   import { inject, Container, transient }  from 'aurelia-dependency-injection';
   import { customAttribute, bindable, customElement, BindableProperty, HtmlBehaviorResource, noView, processContent, TargetInstruction, TemplatingEngine, children, ViewResources }  from 'aurelia-templating';
@@ -43,6 +44,7 @@ declare module 'aurelia-kendoui-plugin' {
     kendoButton(): KendoConfigBuilder;
     kendoGrid(): KendoConfigBuilder;
     kendoChart(): KendoConfigBuilder;
+    kendoTabStrip(): KendoConfigBuilder;
   }
   export function configure(aurelia: Aurelia, configCallback?: ((builder: KendoConfigBuilder) => void)): any;
   export class AutoComplete {
@@ -322,5 +324,12 @@ declare module 'aurelia-kendoui-plugin' {
   export class Col {
     templates: any;
     bind(): any;
+  }
+  export class TabStrip {
+    options: any;
+    constructor(element: any, widgetBase: any);
+    bind(ctx: any): any;
+    recreate(): any;
+    detached(): any;
   }
 }

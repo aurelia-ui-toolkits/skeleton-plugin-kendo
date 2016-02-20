@@ -9,6 +9,7 @@ import 'kendo.dataviz.chart.funnel.min';
 import 'kendo.data.signalr.min';
 import 'kendo.filtercell.min';
 import 'kendo.grid.min';
+import 'kendo.tabstrip.min';
 import {Aurelia} from 'aurelia-framework';
 import {inject,Container,transient} from 'aurelia-dependency-injection';
 import {customAttribute,bindable,customElement,BindableProperty,HtmlBehaviorResource,noView,processContent,TargetInstruction,TemplatingEngine,children,ViewResources} from 'aurelia-templating';
@@ -29,7 +30,8 @@ export class KendoConfigBuilder {
   */
   core(): KendoConfigBuilder {
     this.kendoAutoComplete()
-      .kendoButton();
+      .kendoButton()
+      .kendoTabStrip();
     return this;
   }
 
@@ -72,6 +74,12 @@ export class KendoConfigBuilder {
     this.resources.push('chart/chart');
     return this;
   }
+
+  kendoTabStrip(): KendoConfigBuilder {
+    this.resources.push('tabstrip/tabstrip');
+    return this;
+  }
+
 }
 
 let logger = LogManager.getLogger('aurelia-kendoui-plugin');
@@ -951,5 +959,37 @@ export class Col {
 
   bind() {
     useTemplates(this, 'GridColumn', this.templates);
+  }
+}
+
+@customAttribute(`${constants.attributePrefix}tabstrip`)
+@generateBindables('kendoTabStrip')
+@inject(Element, WidgetBase)
+export class TabStrip {
+
+  @bindable options = {};
+
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoTabStrip')
+                        .linkViewModel(this);
+  }
+
+  bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  }
+
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  }
+
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
   }
 }

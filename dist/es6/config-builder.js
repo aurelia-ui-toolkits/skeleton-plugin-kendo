@@ -11,7 +11,8 @@ export class KendoConfigBuilder {
   */
   core(): KendoConfigBuilder {
     this.kendoAutoComplete()
-      .kendoButton();
+      .kendoButton()
+      .kendoTabStrip();
     return this;
   }
 
@@ -54,4 +55,10 @@ export class KendoConfigBuilder {
     this.resources.push('chart/chart');
     return this;
   }
+
+  kendoTabStrip(): KendoConfigBuilder {
+    this.resources.push('tabstrip/tabstrip');
+    return this;
+  }
+
 }

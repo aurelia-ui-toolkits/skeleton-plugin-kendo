@@ -17,7 +17,7 @@ System.register([], function (_export) {
         }
 
         KendoConfigBuilder.prototype.core = function core() {
-          this.kendoAutoComplete().kendoButton();
+          this.kendoAutoComplete().kendoButton().kendoTabStrip();
           return this;
         };
 
@@ -49,6 +49,11 @@ System.register([], function (_export) {
 
         KendoConfigBuilder.prototype.kendoChart = function kendoChart() {
           this.resources.push('chart/chart');
+          return this;
+        };
+
+        KendoConfigBuilder.prototype.kendoTabStrip = function kendoTabStrip() {
+          this.resources.push('tabstrip/tabstrip');
           return this;
         };
 
