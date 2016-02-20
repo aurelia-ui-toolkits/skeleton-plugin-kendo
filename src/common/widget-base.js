@@ -1,19 +1,15 @@
-import {pruneOptions} from './options';
-import {fireKendoEvent} from './events';
-import {getEventsFromAttributes, _hyphenate, getBindablePropertyName} from './util';
+import {fireKendoEvent, getEventsFromAttributes, _hyphenate, pruneOptions, useTemplates} from './util';
+import {OptionsBuilder} from './options-builder';
 import {TemplateCompiler} from './template-compiler';
-import {TaskQueue} from 'aurelia-framework';
-import {Container} from 'aurelia-dependency-injection';
+import {inject, transient} from 'aurelia-dependency-injection';
+import {TaskQueue} from 'aurelia-task-queue';
 
 /**
 * Abstraction of commonly used code across wrappers
 */
+@transient()
+@inject(TaskQueue, TemplateCompiler, OptionsBuilder)
 export class WidgetBase {
-
-  /**
-  * the Kendo widget after initialization
-  */
-  widget: any;
 
   /**
   * The element of the custom element, or the element on which a custom attribute
@@ -44,32 +40,59 @@ export class WidgetBase {
   $parent: any;
 
   /**
-  * The templating compiler adaptor
+  * The widgets parent viewmodel (this is the object instance the user will bind to)
   */
-  templateCompiler: TemplateCompiler;
+  viewModel: any;
 
-  constructor(controlName: string, element: Element) {
-    // access root container
-    let container = Container.instance;
-    this.taskQueue = container.get(TaskQueue);
-    this.templateCompiler = container.get(TemplateCompiler);
-    this.templateCompiler.initialize();
+  /**
+  * The constructor of a Kendo control
+  */
+  ctor: any;
 
-    this.element = element;
+  constructor(taskQueue, templateCompiler, optionsBuilder) {
+    this.taskQueue = taskQueue;
+    this.optionsBuilder = optionsBuilder;
+    templateCompiler.initialize();
+  }
 
-    this.target = this.element;
+  control(controlName) {
+    if (!controlName || !jQuery.fn[controlName]) {
+      throw new Error(`The name of control ${controlName} is invalid or not set`);
+    }
 
     this.controlName = controlName;
 
-    // the BindableProperty's are created by the generateBindables decorator
-    // but the values of the bindables can only be set now the class has been
-    // instantiated
-    this.setDefaultBindableValues();
+    let ctor = jQuery.fn[this.controlName];
+    this.kendoOptions = ctor.widget.prototype.options;
+    this.kendoEvents = ctor.widget.prototype.events;
+
+    return this;
   }
 
+  linkViewModel(viewModel) {
+    if (!viewModel) {
+      throw new Error('viewModel is not set');
+    }
 
-  bind(ctx) {
-    this.$parent = ctx;
+    this.viewModel = viewModel;
+
+    return this;
+  }
+
+  useViewResources(resources) {
+    if (!resources) {
+      throw new Error('resources is not set');
+    }
+
+    this.viewResources = resources;
+
+    return this;
+  }
+
+  useValueBinding() {
+    this.withValueBinding = true;
+
+    return this;
   }
 
   /**
@@ -77,113 +100,93 @@ export class WidgetBase {
   * calls all hooks
   * then initialized the Kendo control as "widget"
   */
-  _initialize() {
-    if (!this.$parent) {
-      throw new Error('$parent is not set. Did you call bind(ctx) on the widget base?');
+  createWidget(options) {
+    if (!options) {
+      throw new Error('the createWidget() function needs to be called with an object');
     }
 
-    // get the jQuery selector of the target element
-    let target = jQuery(this.target);
+    if (!options.element) {
+      throw new Error('element is not set');
+    }
 
-    // get the constructor of the Kendo control
-    // equivalent to jQuery("<div>").kendoChart
-    let ctor = target[this.controlName];
+    if (!options.parentCtx) {
+      throw new Error('parentCtx is not set');
+    }
 
-    // generate all options, including event handlers
-    let options = this._getOptions(ctor);
+    // generate all options, including event handlers - use the rootElement if specified, otherwise fall back to the element
+    // this allows a child element in a custom elements tempate to be the container for the kendo control
+    // but allows the plugin to correctly discover attributes on the root element to match against events
+    let allOptions = this._getOptions(options.rootElement || options.element);
 
     // before initialization callback
     // allows you to modify/add/remove options before the control gets initialized
-    this._beforeInitialize(options);
+    if (options.beforeInitialize) {
+      options.beforeInitialize(allOptions);
+    }
 
-    // instantiate the Kendo control, pass in the target and the options
-    this.widget = ctor.call(target, options).data(this.controlName);
+    // add parent context to options
+    // deepExtend in kendo.core will fail with stack
+    // overflow if we don't put it in an array :-\
+    Object.assign(allOptions, {
+      _$parent: [options.parentCtx],
+      _$resources: [this.viewResources]
+    });
 
-    this.widget._$parent = this.$parent;
+    // instantiate the Kendo control
+    let widget = this._createWidget(options.element, allOptions, this.controlName);
 
-    this._initialized();
+    widget._$parent = options.parentCtx;
+    widget._$resources = this.viewResources;
+
+    if (this.withValueBinding) {
+      widget.first('change', (args) => this._handleChange(args.sender));
+
+      // sync kValue after initialization of the widget
+      // some widgets (such as dropdownlist) select first item
+      this._handleChange(widget);
+    }
+
+    if (options.afterInitialize) {
+      options.afterInitialize();
+    }
+
+    return widget;
   }
 
-  /**
-  * hook that allows a wrapper to modify options before
-  * the Kendo control is initialized
-  * @param options the options object that a wrapper can modify
-  */
-  _beforeInitialize(options) {
 
+  _createWidget(element, options, controlName) {
+    return jQuery(element)[controlName](options).data(controlName);
   }
 
-  /**
-  * hook that allows a wrapper to take actions after the widget is initialized
-  */
-  _initialized() {
-
-  }
-
-  /**
-  * Re-initializes the control
-  */
-  recreate() {
-    this._initialize();
-  }
 
   /**
   * combines all options objects and properties into a single options object
   */
-  _getOptions(ctor) {
-    let options = this.getOptionsFromBindables();
-    let eventOptions = this.getEventOptions(ctor);
+  _getOptions(element) {
+    let options = this.optionsBuilder.getOptions(this.viewModel, this.controlName);
+    let eventOptions = this.getEventOptions(element);
 
     // merge all option objects together
-    // - options property on the wrapper
+    // - options on the wrapper
     // - options compiled from all the bindable properties
     // - event handler options
-    return Object.assign({}, this.options, pruneOptions(options), eventOptions);
+    return pruneOptions(Object.assign({}, this.viewModel.options, options, eventOptions));
   }
 
-  /**
-  * loops through all bindable properties generated by the @generateBindables decorator
-  * and puts all these values in a single options object
-  */
-  getOptionsFromBindables() {
-    let props = jQuery.fn[this.controlName].widget.prototype.options;
-    let options = {};
-
-    for (let prop of Object.keys(props)) {
-      options[prop] = this[getBindablePropertyName(prop)];
-    }
-
-    if (this.kDataSource) {
-      options.dataSource = this.kDataSource;
-    }
-
-    return options;
-  }
-
-  /**
-  * sets the default value of all bindable properties
-  *  gets the value from the options object in the Kendo control itself
-  */
-  setDefaultBindableValues() {
-    let props = jQuery.fn[this.controlName].widget.prototype.options;
-
-    for (let prop of Object.keys(props)) {
-      this[getBindablePropertyName(prop)] = props[prop];
-    }
-  }
 
   /**
   * convert attributes into a list of events a user wants to subscribe to.
   * These events are then subscribed to, which when called
   * calls the fireKendoEvent function to raise a DOM event
   */
-  getEventOptions(ctor) {
+  getEventOptions(element) {
     let options = {};
-    let allowedEvents = ctor.widget.prototype.events;
+    let allowedEvents = this.kendoEvents;
+    let delayedExecution = ['change'];
 
     // iterate all attributes on the custom elements
     // and only return the normalized kendo event's (dataBound etc)
-    let events = getEventsFromAttributes(this.element);
+    let events = getEventsFromAttributes(element);
 
     events.forEach(event => {
       // throw error if this event is not defined on the Kendo control
@@ -191,23 +194,37 @@ export class WidgetBase {
         throw new Error(`${event} is not an event on the ${this.controlName} control`);
       }
 
-      // add an event handler 'proxy' to the options object
-      options[event] = e => {
-        this.taskQueue.queueMicroTask(() => {
-          fireKendoEvent(this.target, _hyphenate(event), e);
-        });
-      };
+      if (delayedExecution.includes(event)) {
+        options[event] = e => {
+          this.taskQueue.queueMicroTask(() => fireKendoEvent(element, _hyphenate(event), e));
+        };
+      } else {
+        options[event] = e => fireKendoEvent(element, _hyphenate(event), e);
+      }
     });
 
     return options;
   }
 
-  /**
-  * destroys the widget when the view gets detached
-  */
-  detached() {
-    if (this.widget) {
-      this.widget.destroy();
+
+  _handleChange(widget) {
+    this.viewModel.kValue = widget.value();
+  }
+
+  handlePropertyChanged(widget, property, newValue, oldValue) {
+    if (property === 'kValue' && this.withValueBinding) {
+      widget.value(newValue);
     }
+  }
+
+  useTemplates(target, controlName, templates) {
+    return useTemplates(target, controlName, templates);
+  }
+
+  /**
+  * destroys the widget
+  */
+  destroy(widget) {
+    widget.destroy();
   }
 }

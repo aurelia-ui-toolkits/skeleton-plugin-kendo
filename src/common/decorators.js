@@ -1,5 +1,8 @@
 import {BindableProperty, HtmlBehaviorResource} from 'aurelia-templating';
+import {Container} from 'aurelia-dependency-injection';
 import {metadata} from 'aurelia-metadata';
+import {bindingMode} from 'aurelia-binding';
+import {ControlProperties} from './control-properties';
 import {getBindablePropertyName} from './util';
 
 /**
@@ -9,20 +12,23 @@ import {getBindablePropertyName} from './util';
 */
 export function generateBindables(controlName: string) {
   return function(target, key, descriptor) {
-    // get all options defined in the Kendo control
-    let options = jQuery.fn[controlName].widget.prototype.options;
-
     // get or create the HtmlBehaviorResource
     // on which we're going to create the BindableProperty's
     let behaviorResource = metadata.getOrCreateOwn(metadata.resource, HtmlBehaviorResource, target);
-    let optionKeys = Object.keys(options);
-    optionKeys.push('dataSource');
+    let controlProperties = (Container.instance || new Container()).get(ControlProperties);
+    let optionKeys = controlProperties.getProperties(controlName);
+
+    optionKeys.push('widget');
 
     for (let option of optionKeys) {
       // set the name of the bindable property to the option
       let nameOrConfigOrTarget = {
         name: getBindablePropertyName(option)
       };
+
+      if (option === 'widget') {
+        nameOrConfigOrTarget.defaultBindingMode = bindingMode.twoWay;
+      }
 
       let prop = new BindableProperty(nameOrConfigOrTarget);
       prop.registerWith(target, behaviorResource, descriptor);
