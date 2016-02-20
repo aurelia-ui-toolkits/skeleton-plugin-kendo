@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-framework', 'aurelia-templating'], function (exports, _aureliaFramework, _aureliaTemplating) {
+define(['exports', 'aurelia-dependency-injection', 'aurelia-templating'], function (exports, _aureliaDependencyInjection, _aureliaTemplating) {
   'use strict';
 
   exports.__esModule = true;
@@ -31,7 +31,8 @@ define(['exports', 'aurelia-framework', 'aurelia-templating'], function (exports
     TemplateCompiler.prototype.handleTemplateEvents = function handleTemplateEvents(widget, _event, _args) {
       if (_event !== 'compile' && _event !== 'cleanup') return;
 
-      var $parent = widget._$parent;
+      var $parent = widget._$parent || (widget.options._$parent ? widget.options._$parent[0] : undefined);
+      var viewResources = widget._$resources || (widget.options._$resources ? widget.options._$resources[0] : undefined);
 
       if (!$parent) return;
 
@@ -41,7 +42,7 @@ define(['exports', 'aurelia-framework', 'aurelia-templating'], function (exports
 
       switch (_event) {
         case 'compile':
-          this.compile($parent, elements, data);
+          this.compile($parent, elements, data, viewResources);
           break;
 
         case 'cleanup':
@@ -53,7 +54,7 @@ define(['exports', 'aurelia-framework', 'aurelia-templating'], function (exports
       }
     };
 
-    TemplateCompiler.prototype.compile = function compile($parent, elements, data) {
+    TemplateCompiler.prototype.compile = function compile($parent, elements, data, viewResources) {
       var _this2 = this;
 
       var _loop = function (i) {
@@ -62,15 +63,15 @@ define(['exports', 'aurelia-framework', 'aurelia-templating'], function (exports
 
         if (data && data[i]) {
           var _data = data[i];
-          ctx = _data.dataItem;
+          ctx = _data.dataItem || _data.aggregate || _data;
         }
 
         if (element instanceof jQuery) {
           element.each(function (index, elem) {
-            return _this2.enhanceView($parent, elem, ctx);
+            return _this2.enhanceView($parent, elem, ctx, viewResources);
           });
         } else {
-          _this2.enhanceView($parent, element, ctx);
+          _this2.enhanceView($parent, element, ctx, viewResources);
         }
       };
 
@@ -79,12 +80,24 @@ define(['exports', 'aurelia-framework', 'aurelia-templating'], function (exports
       }
     };
 
-    TemplateCompiler.prototype.enhanceView = function enhanceView($parent, element, ctx) {
-      var view = this.templatingEngine.enhance(element);
+    TemplateCompiler.prototype.enhanceView = function enhanceView($parent, element, ctx, viewResources) {
+      var view = $(element).data('viewInstance');
+
+      if (element.querySelectorAll('.au-target').length === 0) {
+        if (viewResources) {
+          view = this.templatingEngine.enhance({
+            element: element,
+            resources: viewResources
+          });
+        } else {
+          view = this.templatingEngine.enhance(element);
+        }
+
+        $(element).data('viewInstance', view);
+      }
 
       view.bind(ctx, $parent);
       view.attached();
-      $(element).data('viewInstance', view);
     };
 
     TemplateCompiler.prototype.cleanup = function cleanup(elements) {
@@ -105,7 +118,7 @@ define(['exports', 'aurelia-framework', 'aurelia-templating'], function (exports
     };
 
     var _TemplateCompiler = TemplateCompiler;
-    TemplateCompiler = _aureliaFramework.inject(_aureliaTemplating.TemplatingEngine)(TemplateCompiler) || TemplateCompiler;
+    TemplateCompiler = _aureliaDependencyInjection.inject(_aureliaTemplating.TemplatingEngine)(TemplateCompiler) || TemplateCompiler;
     return TemplateCompiler;
   })();
 

@@ -1,128 +1,44 @@
-import {customAttribute, bindable, inject} from 'aurelia-framework';
+import {inject} from 'aurelia-dependency-injection';
+import {customAttribute, bindable} from 'aurelia-templating';
 import {WidgetBase} from '../common/widget-base';
 import {generateBindables} from '../common/decorators';
-import {fireEvent} from '../common/events';
-import 'kendo-ui/js/kendo.autocomplete.min';
-import 'kendo-ui/js/kendo.virtuallist.min';
+import {constants} from '../common/constants';
+import 'kendo.autocomplete.min';
+import 'kendo.virtuallist.min';
 
-@customAttribute('k-autocomplete')
-@inject(Element)
+@customAttribute(`${constants.attributePrefix}autocomplete`)
 @generateBindables('kendoAutoComplete')
-export class AutoComplete extends WidgetBase {
+@inject(Element, WidgetBase)
+export class AutoComplete {
 
-  @bindable kDataSource;
   @bindable options = {};
 
-  constructor(element) {
-    super('kendoAutoComplete', element);
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoAutoComplete')
+                        .linkViewModel(this)
+                        .useValueBinding();
   }
 
   bind(ctx) {
-    super.bind(ctx);
+    this.$parent = ctx;
 
-    this._initialize();
+    this.recreate();
   }
 
-  _initialize() {
-    super._initialize();
-
-    // without these change and select handlers, when you select an options
-    // the value binding is not updated
-    this.widget.bind('change', (event) => {
-      this.kValue = event.sender.value();
-
-      // Update the kendo binding
-      fireEvent(this.element, 'input');
-    });
-
-    this.widget.bind('select', (event) => {
-      this.kValue = event.sender.value();
-
-      // Update the kendo binding
-      fireEvent(this.element, 'input');
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
     });
   }
 
-  kEnableChanged() {
-    if (this.widget) {
-      this.widget.enable(this.kEnable);
-    }
+  propertyChanged(property, newValue, oldValue) {
+    this.widgetBase.handlePropertyChanged(this.kWidget, property, newValue, oldValue);
   }
 
-  enable(newValue) {
-    if (this.widget) {
-      return this.widget.enable(newValue);
-    }
-  }
-
-  value(newValue) {
-    if (this.widget) {
-      if (newValue) {
-        this.widget.value(newValue);
-        this.widget.trigger('change');
-      } else {
-        return this.widget.value();
-      }
-    }
-  }
-
-  search(value) {
-    if (this.widget) {
-      this.widget.search(value);
-    }
-  }
-
-  close(value) {
-    if (this.widget) {
-      return this.widget.close(value);
-    }
-  }
-
-  dataItem(value) {
-    if (this.widget) {
-      return this.widget.dataItem(value);
-    }
-  }
-
-  destroy() {
-    if (this.widget) {
-      return this.widget.destroy();
-    }
-  }
-
-  focus() {
-    if (this.widget) {
-      return this.widget.focus();
-    }
-  }
-
-  readonly(value) {
-    if (this.widget) {
-      return this.widget.readonly(value);
-    }
-  }
-
-  refresh() {
-    if (this.widget) {
-      return this.widget.refresh();
-    }
-  }
-
-  select(value) {
-    if (this.widget) {
-      return this.widget.select(value);
-    }
-  }
-
-  setDataSource(value) {
-    if (this.widget) {
-      return this.widget.setDataSource(value);
-    }
-  }
-
-  suggest(value) {
-    if (this.widget) {
-      return this.widget.suggest(value);
-    }
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
   }
 }

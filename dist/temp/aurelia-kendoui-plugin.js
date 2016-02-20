@@ -6,18 +6,19 @@ var _createDecoratedClass = (function () { function defineProperties(target, des
 
 exports.configure = configure;
 exports.generateBindables = generateBindables;
-exports.fireEvent = fireEvent;
-exports.fireKendoEvent = fireKendoEvent;
-exports.pruneOptions = pruneOptions;
 exports.addHyphenAndLower = addHyphenAndLower;
 exports._hyphenate = _hyphenate;
 exports._unhyphenate = _unhyphenate;
 exports.getBindablePropertyName = getBindablePropertyName;
+exports.getKendoPropertyName = getKendoPropertyName;
 exports.getEventsFromAttributes = getEventsFromAttributes;
+exports.pruneOptions = pruneOptions;
+exports.hasValue = hasValue;
+exports.useTemplates = _useTemplates;
+exports.fireEvent = fireEvent;
+exports.fireKendoEvent = fireKendoEvent;
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer ? descriptor.initializer.call(target) : undefined; Object.defineProperty(target, key, descriptor); }
 
@@ -29,27 +30,35 @@ var LogManager = _interopRequireWildcard(_aureliaLogging);
 
 require('jquery');
 
-require('kendo-ui/js/kendo.autocomplete.min');
+require('kendo.autocomplete.min');
 
-require('kendo-ui/js/kendo.virtuallist.min');
+require('kendo.virtuallist.min');
 
-require('kendo-ui/js/kendo.button.min');
+require('kendo.button.min');
 
-require('kendo-ui/js/kendo.dataviz.chart.min');
+require('kendo.dataviz.chart.min');
 
-require('kendo-ui/js/kendo.data.signalr.min');
+require('kendo.dataviz.chart.polar.min');
 
-require('kendo-ui/js/kendo.filtercell.min');
+require('kendo.dataviz.chart.funnel.min');
 
-require('kendo-ui/js/kendo.grid.min');
+require('kendo.data.signalr.min');
+
+require('kendo.filtercell.min');
+
+require('kendo.grid.min');
 
 var _aureliaFramework = require('aurelia-framework');
+
+var _aureliaDependencyInjection = require('aurelia-dependency-injection');
 
 var _aureliaTemplating = require('aurelia-templating');
 
 var _aureliaMetadata = require('aurelia-metadata');
 
-var _aureliaDependencyInjection = require('aurelia-dependency-injection');
+var _aureliaBinding = require('aurelia-binding');
+
+var _aureliaTaskQueue = require('aurelia-task-queue');
 
 var KendoConfigBuilder = (function () {
   function KendoConfigBuilder() {
@@ -60,12 +69,12 @@ var KendoConfigBuilder = (function () {
   }
 
   KendoConfigBuilder.prototype.core = function core() {
-    this.kendoButton().kendoTabStrip().kendoProgressBar().kendoSlider().kendoColorPicker().kendoDropDownList();
+    this.kendoAutoComplete().kendoButton();
     return this;
   };
 
   KendoConfigBuilder.prototype.pro = function pro() {
-    this.core().kendoGrid().kendoAutoComplete().kendoChart();
+    this.core().kendoGrid().kendoChart();
     return this;
   };
 
@@ -121,309 +130,223 @@ function configure(aurelia, configCallback) {
   }
 }
 
-var AutoComplete = (function (_WidgetBase) {
+var AutoComplete = (function () {
   var _instanceInitializers = {};
 
-  _inherits(AutoComplete, _WidgetBase);
-
   _createDecoratedClass(AutoComplete, [{
-    key: 'kDataSource',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
     key: 'options',
-    decorators: [_aureliaFramework.bindable],
+    decorators: [_aureliaTemplating.bindable],
     initializer: function initializer() {
       return {};
     },
     enumerable: true
   }], null, _instanceInitializers);
 
-  function AutoComplete(element) {
+  function AutoComplete(element, widgetBase) {
     _classCallCheck(this, _AutoComplete);
 
-    _WidgetBase.call(this, 'kendoAutoComplete', element);
-
-    _defineDecoratedPropertyDescriptor(this, 'kDataSource', _instanceInitializers);
-
     _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers);
+
+    this.element = element;
+    this.widgetBase = widgetBase.control('kendoAutoComplete').linkViewModel(this).useValueBinding();
   }
 
   AutoComplete.prototype.bind = function bind(ctx) {
-    _WidgetBase.prototype.bind.call(this, ctx);
+    this.$parent = ctx;
 
-    this._initialize();
+    this.recreate();
   };
 
-  AutoComplete.prototype._initialize = function _initialize() {
-    var _this2 = this;
-
-    _WidgetBase.prototype._initialize.call(this);
-
-    this.widget.bind('change', function (event) {
-      _this2.kValue = event.sender.value();
-
-      fireEvent(_this2.element, 'input');
-    });
-
-    this.widget.bind('select', function (event) {
-      _this2.kValue = event.sender.value();
-
-      fireEvent(_this2.element, 'input');
+  AutoComplete.prototype.recreate = function recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
     });
   };
 
-  AutoComplete.prototype.kEnableChanged = function kEnableChanged() {
-    if (this.widget) {
-      this.widget.enable(this.kEnable);
-    }
+  AutoComplete.prototype.propertyChanged = function propertyChanged(property, newValue, oldValue) {
+    this.widgetBase.handlePropertyChanged(this.kWidget, property, newValue, oldValue);
   };
 
-  AutoComplete.prototype.enable = function enable(newValue) {
-    if (this.widget) {
-      return this.widget.enable(newValue);
-    }
-  };
-
-  AutoComplete.prototype.value = function value(newValue) {
-    if (this.widget) {
-      if (newValue) {
-        this.widget.value(newValue);
-        this.widget.trigger('change');
-      } else {
-        return this.widget.value();
-      }
-    }
-  };
-
-  AutoComplete.prototype.search = function search(value) {
-    if (this.widget) {
-      this.widget.search(value);
-    }
-  };
-
-  AutoComplete.prototype.close = function close(value) {
-    if (this.widget) {
-      return this.widget.close(value);
-    }
-  };
-
-  AutoComplete.prototype.dataItem = function dataItem(value) {
-    if (this.widget) {
-      return this.widget.dataItem(value);
-    }
-  };
-
-  AutoComplete.prototype.destroy = function destroy() {
-    if (this.widget) {
-      return this.widget.destroy();
-    }
-  };
-
-  AutoComplete.prototype.focus = function focus() {
-    if (this.widget) {
-      return this.widget.focus();
-    }
-  };
-
-  AutoComplete.prototype.readonly = function readonly(value) {
-    if (this.widget) {
-      return this.widget.readonly(value);
-    }
-  };
-
-  AutoComplete.prototype.refresh = function refresh() {
-    if (this.widget) {
-      return this.widget.refresh();
-    }
-  };
-
-  AutoComplete.prototype.select = function select(value) {
-    if (this.widget) {
-      return this.widget.select(value);
-    }
-  };
-
-  AutoComplete.prototype.setDataSource = function setDataSource(value) {
-    if (this.widget) {
-      return this.widget.setDataSource(value);
-    }
-  };
-
-  AutoComplete.prototype.suggest = function suggest(value) {
-    if (this.widget) {
-      return this.widget.suggest(value);
-    }
+  AutoComplete.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
   };
 
   var _AutoComplete = AutoComplete;
+  AutoComplete = _aureliaDependencyInjection.inject(Element, WidgetBase)(AutoComplete) || AutoComplete;
   AutoComplete = generateBindables('kendoAutoComplete')(AutoComplete) || AutoComplete;
-  AutoComplete = _aureliaFramework.inject(Element)(AutoComplete) || AutoComplete;
-  AutoComplete = _aureliaFramework.customAttribute('k-autocomplete')(AutoComplete) || AutoComplete;
+  AutoComplete = _aureliaTemplating.customAttribute(constants.attributePrefix + 'autocomplete')(AutoComplete) || AutoComplete;
   return AutoComplete;
-})(WidgetBase);
+})();
 
 exports.AutoComplete = AutoComplete;
 
-var Button = (function (_WidgetBase2) {
+var Button = (function () {
   var _instanceInitializers2 = {};
-
-  _inherits(Button, _WidgetBase2);
 
   _createDecoratedClass(Button, [{
     key: 'options',
-    decorators: [_aureliaFramework.bindable],
+    decorators: [_aureliaTemplating.bindable],
     initializer: function initializer() {
       return {};
     },
     enumerable: true
   }], null, _instanceInitializers2);
 
-  function Button(element) {
+  function Button(element, widgetBase) {
     _classCallCheck(this, _Button);
 
-    _WidgetBase2.call(this, 'kendoButton', element);
-
     _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers2);
+
+    this.element = element;
+    this.widgetBase = widgetBase.control('kendoButton').linkViewModel(this);
   }
 
   Button.prototype.bind = function bind(ctx) {
-    _WidgetBase2.prototype.bind.call(this, ctx);
+    this.$parent = ctx;
 
-    this._initialize();
+    this.recreate();
   };
 
-  Button.prototype.kEnableChanged = function kEnableChanged() {
-    if (this.widget) {
-      this.widget.enable(this.kEnable);
-    }
+  Button.prototype.recreate = function recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
   };
 
-  Button.prototype.enable = function enable(_enable) {
-    if (this.widget) {
-      this.widget.enable(_enable);
-    }
+  Button.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
   };
 
   var _Button = Button;
-  Button = _aureliaFramework.inject(Element)(Button) || Button;
+  Button = _aureliaDependencyInjection.inject(Element, WidgetBase)(Button) || Button;
   Button = generateBindables('kendoButton')(Button) || Button;
-  Button = _aureliaFramework.customAttribute('k-button')(Button) || Button;
+  Button = _aureliaTemplating.customAttribute(constants.attributePrefix + 'button')(Button) || Button;
   return Button;
-})(WidgetBase);
+})();
 
 exports.Button = Button;
 
-var Chart = (function (_WidgetBase3) {
+var Chart = (function () {
   var _instanceInitializers3 = {};
 
-  _inherits(Chart, _WidgetBase3);
-
   _createDecoratedClass(Chart, [{
-    key: 'kDataSource',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
     key: 'options',
-    decorators: [_aureliaFramework.bindable],
+    decorators: [_aureliaTemplating.bindable],
     initializer: function initializer() {
       return {};
     },
     enumerable: true
   }], null, _instanceInitializers3);
 
-  function Chart(element) {
+  function Chart(element, widgetBase) {
     _classCallCheck(this, _Chart);
 
-    _WidgetBase3.call(this, 'kendoChart', element);
-
-    _defineDecoratedPropertyDescriptor(this, 'kDataSource', _instanceInitializers3);
-
     _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers3);
+
+    this.element = element;
+    this.widgetBase = widgetBase.control('kendoChart').linkViewModel(this);
   }
 
+  Chart.prototype.bind = function bind(ctx) {
+    this.$parent = ctx;
+  };
+
   Chart.prototype.attached = function attached() {
-    this._initialize();
+    this.recreate();
   };
 
-  Chart.prototype.getAxis = function getAxis(name) {
-    if (this.widget) {
-      return this.widget.getAxis(name);
-    }
+  Chart.prototype.recreate = function recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
   };
 
-  Chart.prototype.redraw = function redraw() {
-    if (this.widget) {
-      return this.widget.redraw();
-    }
-  };
-
-  Chart.prototype.refresh = function refresh() {
-    if (this.widget) {
-      return this.widget.refresh();
-    }
-  };
-
-  Chart.prototype.resize = function resize() {
-    if (this.widget) {
-      return this.widget.resize();
-    }
-  };
-
-  Chart.prototype.setDataSource = function setDataSource(dataSource) {
-    if (this.widget) {
-      return this.widget.setDataSource(dataSource);
-    }
-  };
-
-  Chart.prototype.setOptions = function setOptions(value) {
-    if (this.widget) {
-      return this.widget.setOptions(value);
-    }
-  };
-
-  Chart.prototype.imageDataURL = function imageDataURL() {
-    if (this.widget) {
-      return this.widget.imageDataURL();
-    }
-  };
-
-  Chart.prototype.toggleHighlight = function toggleHighlight(show, options) {
-    if (this.widget) {
-      return this.widget.toggleHighlight(show, options);
-    }
-  };
-
-  Chart.prototype.destroy = function destroy() {
-    if (this.widget) {
-      return this.widget.destroy();
-    }
+  Chart.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
   };
 
   var _Chart = Chart;
-  Chart = _aureliaFramework.inject(Element)(Chart) || Chart;
+  Chart = _aureliaDependencyInjection.inject(Element, WidgetBase)(Chart) || Chart;
   Chart = generateBindables('kendoChart')(Chart) || Chart;
-  Chart = _aureliaFramework.customElement('k-chart')(Chart) || Chart;
+  Chart = _aureliaTemplating.customElement(constants.elementPrefix + 'chart')(Chart) || Chart;
   return Chart;
-})(WidgetBase);
+})();
 
 exports.Chart = Chart;
+var bindables = { "kendoAutoComplete": ["animation", "dataSource", "dataTextField", "delay", "enable", "filter", "fixedGroupTemplate", "groupTemplate", "headerTemplate", "height", "highlightFirst", "ignoreCase", "minLength", "name", "placeholder", "popup", "separator", "suggest", "template", "valuePrimitive", "virtual"], "kendoBarcode": ["background", "border", "checksum", "color", "height", "name", "padding", "renderAs", "text", "type", "value", "width"], "kendoButton": ["enable", "icon", "imageUrl", "name", "spriteCssClass"], "kendoCalendar": ["culture", "dates", "depth", "disableDates", "footer", "format", "max", "min", "month", "name", "start", "value"], "kendoChart": ["autoBind", "axisDefaults", "categoryAxis", "chartArea", "dataSource", "legend", "name", "panes", "pannable", "pdf", "plotArea", "renderAs", "series", "seriesColors", "seriesDefaults", "theme", "title", "tooltip", "transitions", "valueAxis", "xAxis", "yAxis", "zoomable"], "kendoColorPalette": ["columns", "name", "palette", "tileSize", "value"], "kendoColorPicker": ["buttons", "columns", "messages", "name", "opacity", "palette", "preview", "tileSize", "toolIcon", "value"], "kendoComboBox": ["animation", "autoBind", "cascadeFrom", "cascadeFromField", "dataSource", "dataTextField", "dataValueField", "delay", "enable", "filter", "fixedGroupTemplate", "groupTemplate", "headerTemplate", "height", "highlightFirst", "ignoreCase", "index", "minLength", "name", "placeholder", "popup", "suggest", "template", "text", "value", "valuePrimitive", "virtual"], "kendoContextMenu": ["alignToAnchor", "animation", "closeOnClick", "dataSource", "direction", "filter", "hoverDelay", "name", "orientation", "popupCollision", "showOn", "target"], "kendoDatePicker": ["ARIATemplate", "animation", "culture", "dates", "depth", "disableDates", "footer", "format", "max", "min", "month", "name", "parseFormats", "start", "value"], "kendoDateTimePicker": ["ARIATemplate", "animation", "culture", "dates", "depth", "disableDates", "footer", "format", "interval", "max", "min", "month", "name", "parseFormats", "start", "timeFormat", "value"], "kendoDiagram": ["autoBind", "connectionDefaults", "connections", "connectionsDataSource", "dataSource", "editable", "layout", "name", "pannable", "pdf", "selectable", "shapeDefaults", "shapes", "template", "zoom", "zoomMax", "zoomMin", "zoomRate"], "kendoDraggable": ["axis", "container", "cursorOffset", "distance", "filter", "group", "hint", "ignore"], "kendoDropDownList": ["animation", "autoBind", "cascadeFrom", "cascadeFromField", "dataSource", "dataTextField", "dataValueField", "delay", "enable", "filter", "fixedGroupTemplate", "groupTemplate", "headerTemplate", "height", "ignoreCase", "index", "minLength", "name", "optionLabel", "optionLabelTemplate", "popup", "template", "text", "value", "valuePrimitive", "valueTemplate", "virtual"], "kendoDropTarget": ["group"], "kendoDropTargetArea": ["filter", "group"], "kendoEditor": ["domain", "encoded", "fileBrowser", "imageBrowser", "messages", "name", "pdf", "resizable", "serialization", "stylesheets", "tools"], "kendoFlatColorPicker": ["autoupdate", "buttons", "messages", "name", "opacity", "preview", "value"], "kendoGantt": ["assignments", "autoBind", "columnResizeHandleWidth", "columns", "currentTimeMarker", "dataSource", "dependencies", "editable", "height", "hourSpan", "listWidth", "messages", "name", "navigatable", "pdf", "resizable", "resources", "rowHeight", "selectable", "showWorkDays", "showWorkHours", "snap", "taskTemplate", "toolbar", "tooltip", "views", "workDayEnd", "workDayStart", "workWeekEnd", "workWeekStart"], "kendoGrid": ["allowCopy", "altRowTemplate", "autoBind", "columnMenu", "columnResizeHandleWidth", "columns", "dataSource", "detailTemplate", "editable", "excel", "filterable", "groupable", "height", "messages", "mobile", "name", "navigatable", "noRecords", "pageable", "pdf", "reorderable", "resizable", "rowTemplate", "scrollable", "selectable", "sortable", "toolbar"], "kendoLinearGauge": ["gaugeArea", "name", "pointer", "renderAs", "scale", "transitions"], "kendoListView": ["altTemplate", "autoBind", "dataSource", "editTemplate", "name", "navigatable", "selectable", "template"], "kendoMap": ["center", "controls", "layerDefaults", "layers", "markerDefaults", "markers", "maxZoom", "minSize", "minZoom", "name", "pannable", "wraparound", "zoom", "zoomable"], "kendoMaskedTextBox": ["clearPromptChar", "culture", "mask", "name", "promptChar", "rules", "unmaskOnPost", "value"], "kendoMenu": ["animation", "closeOnClick", "dataSource", "direction", "hoverDelay", "name", "openOnClick", "orientation", "popupCollision"], "kendoMobileActionSheet": ["cancel", "name", "popup", "type"], "kendoMobileBackButton": ["name"], "kendoMobileButton": ["badge", "clickOn", "enable", "icon", "name"], "kendoMobileButtonGroup": ["enable", "index", "name", "selectOn"], "kendoMobileCollapsible": ["animation", "collapsed", "expandIcon", "iconPosition", "inset", "name"], "kendoMobileDetailButton": ["name"], "kendoMobileDrawer": ["container", "name", "position", "swipeToOpen", "swipeToOpenViews", "title", "views"], "kendoMobileLayout": ["id", "name", "platform"], "kendoMobileListView": ["appendOnRefresh", "autoBind", "dataSource", "endlessScroll", "filterable", "fixedHeaders", "headerTemplate", "loadMore", "messages", "name", "pullParameters", "pullToRefresh", "style", "template", "type", "virtualViewSize"], "kendoMobileLoader": ["name"], "kendoMobileModalView": ["height", "modal", "name", "width"], "kendoMobileNavBar": ["name"], "kendoMobilePane": ["collapsible", "initial", "layout", "loading", "name", "portraitWidth", "transition"], "kendoMobilePopOver": ["name", "pane", "popup"], "kendoMobileScrollView": ["autoBind", "bounceVelocityThreshold", "contentHeight", "dataSource", "duration", "emptyTemplate", "enablePager", "itemsPerPage", "name", "page", "pageSize", "template", "velocityThreshold"], "kendoMobileScroller": ["elastic", "messages", "name", "pullOffset", "pullToRefresh", "useNative", "visibleScrollHints", "zoom"], "kendoMobileSplitView": ["name", "style"], "kendoMobileSwitch": ["checked", "enable", "name", "offLabel", "onLabel"], "kendoMobileTabStrip": ["name", "selectedIndex"], "kendoMobileView": ["model", "name", "reload", "scroller", "stretch", "title", "useNativeScrolling", "zoom"], "kendoMultiSelect": ["animation", "autoBind", "autoClose", "dataSource", "dataTextField", "dataValueField", "delay", "enable", "filter", "fixedGroupTemplate", "groupTemplate", "headerTemplate", "height", "highlightFirst", "ignoreCase", "itemTemplate", "maxSelectedItems", "minLength", "name", "placeholder", "popup", "tagMode", "tagTemplate", "value", "valuePrimitive", "virtual"], "kendoNotification": ["allowHideAfter", "animation", "appendTo", "autoHideAfter", "button", "height", "hideOnClick", "name", "position", "stacking", "templates", "width"], "kendoNumericTextBox": ["culture", "decimals", "downArrowText", "format", "max", "min", "name", "placeholder", "spinners", "step", "upArrowText", "value"], "kendoPager": ["autoBind", "buttonCount", "dataSource", "info", "input", "linkTemplate", "messages", "name", "numeric", "pageSizes", "previousNext", "refresh", "selectTemplate"], "kendoPanelBar": ["animation", "contentUrls", "dataSource", "expandMode", "name"], "kendoPivotConfigurator": ["dataSource", "filterable", "height", "messages", "name", "sortable"], "kendoPivotGrid": ["autoBind", "columnHeaderTemplate", "columnWidth", "dataCellTemplate", "dataSource", "excel", "filterable", "height", "kpiStatusTemplate", "kpiTrendTemplate", "messages", "name", "pdf", "reorderable", "rowHeaderTemplate", "sortable"], "kendoPopup": ["anchor", "animation", "appendTo", "name", "origin", "position"], "kendoProgressBar": ["animation", "chunkCount", "enable", "max", "min", "name", "orientation", "reverse", "showStatus", "type", "value"], "kendoQRCode": ["background", "border", "color", "encoding", "errorCorrection", "name", "padding", "renderAs", "size", "value"], "kendoRadialGauge": ["gaugeArea", "name", "pointer", "renderAs", "scale", "transitions"], "kendoRangeSlider": ["largeStep", "max", "min", "name", "orientation", "selectionEnd", "selectionStart", "smallStep", "tickPlacement", "tooltip"], "kendoResponsivePanel": ["autoClose", "breakpoint", "name", "orientation", "toggleButton"], "kendoScheduler": ["allDayEventTemplate", "allDaySlot", "autoBind", "currentTimeMarker", "dataSource", "date", "dateHeaderTemplate", "editable", "endTime", "eventTemplate", "footer", "group", "groupHeaderTemplate", "height", "majorTick", "majorTimeHeaderTemplate", "max", "messages", "min", "minorTickCount", "minorTimeHeaderTemplate", "mobile", "name", "pdf", "resources", "selectable", "showWorkHours", "snap", "startTime", "timezone", "toolbar", "views", "width", "workDayEnd", "workDayStart", "workWeekEnd", "workWeekStart"], "kendoSlider": ["decreaseButtonTitle", "increaseButtonTitle", "largeStep", "max", "min", "name", "orientation", "showButtons", "smallStep", "tickPlacement", "tooltip", "value"], "kendoSortable": ["autoScroll", "axis", "connectWith", "container", "cursor", "cursorOffset", "disabled", "filter", "handler", "hint", "holdToDrag", "ignore", "name", "placeholder"], "kendoSparkline": ["autoBind", "axisDefaults", "categoryAxis", "chartArea", "data", "dataSource", "name", "plotArea", "pointWidth", "renderAs", "series", "seriesColors", "seriesDefaults", "theme", "tooltip", "transitions", "type", "valueAxis"], "kendoSplitter": ["name", "orientation", "panes"], "kendoSpreadsheet": ["activeSheet", "columnWidth", "columns", "excel", "headerHeight", "headerWidth", "name", "pdf", "rowHeight", "rows", "sheets", "sheetsbar", "toolbar"], "kendoStockChart": ["autoBind", "axisDefaults", "categoryAxis", "chartArea", "dataSource", "dateField", "legend", "name", "navigator", "panes", "pdf", "plotArea", "renderAs", "series", "seriesColors", "seriesDefaults", "theme", "title", "tooltip", "transitions", "valueAxis"], "kendoTabStrip": ["animation", "collapsible", "contentUrls", "dataContentField", "dataContentUrlField", "dataImageUrlField", "dataSource", "dataSpriteCssClass", "dataTextField", "dataUrlField", "name", "navigatable", "scrollable", "tabPosition", "value"], "kendoTimePicker": ["animation", "culture", "dates", "format", "interval", "max", "min", "name", "parseFormats", "value"], "kendoToolBar": ["items", "name", "resizable"], "kendoTooltip": ["animation", "autoHide", "callout", "content", "filter", "height", "iframe", "name", "position", "showAfter", "showOn", "width"], "kendoTouch": ["doubleTapTimeout", "enableSwipe", "filter", "maxDuration", "maxYDelta", "minHold", "minXDelta", "multiTouch", "name", "surface"], "kendoTreeList": ["autoBind", "columnMenu", "columns", "dataSource", "editable", "excel", "filterable", "height", "messages", "name", "pdf", "reorderable", "resizable", "scrollable", "selectable", "sortable", "toolbar"], "kendoTreeMap": ["autoBind", "colorField", "colors", "dataSource", "name", "template", "textField", "theme", "type", "valueField"], "kendoTreeView": ["animation", "autoBind", "autoScroll", "checkboxes", "dataImageUrlField", "dataSource", "dataSpriteCssClassField", "dataTextField", "dataUrlField", "dragAndDrop", "loadOnDemand", "messages", "name", "template"], "kendoUpload": ["async", "enabled", "files", "localization", "multiple", "name", "showFileList", "template"], "kendoValidator": ["errorTemplate", "messages", "name", "rules", "validateOnBlur"], "kendoWindow": ["actions", "animation", "appendTo", "autoFocus", "content", "draggable", "height", "iframe", "maxHeight", "maxWidth", "minHeight", "minWidth", "modal", "name", "pinned", "position", "resizable", "scrollable", "title", "visible", "width"], "GridColumn": ["aggregates", "attributes", "columns", "command", "encoded", "field", "filterable", "footerTemplate", "format", "groupFooterTemplate", "groupHeaderTemplate", "groupable", "headerAttributes", "headerTemplate", "hidden", "lockable", "locked", "menu", "minScreenWidth", "sortable", "template", "title", "values", "width", "editor"], "TreeListColumn": ["attributes", "command", "encoded", "expandable", "field", "filterable", "footerTemplate", "format", "headerAttributes", "headerTemplate", "hidden", "lockable", "locked", "menu", "minScreenWidth", "sortable", "template", "title", "width", "editor"] };
+exports.bindables = bindables;
 var constants = {
   eventPrefix: 'k-on-',
-  bindablePrefix: 'k-'
+  bindablePrefix: 'k-',
+  attributePrefix: 'k-',
+  elementPrefix: 'k-'
 };
 
 exports.constants = constants;
 
+var ControlProperties = (function () {
+  function ControlProperties() {
+    _classCallCheck(this, ControlProperties);
+
+    this.cache = [];
+    this.templateProperties = [];
+  }
+
+  ControlProperties.prototype.getProperties = function getProperties(controlName) {
+    if (this.cache[controlName]) {
+      return this.cache[controlName];
+    }
+
+    var options1 = this.getWidgetProperties(controlName);
+
+    var options2 = bindables[controlName];
+
+    if (!options2) {
+      throw new Error(controlName + ' not found in generated bindables.js');
+    }
+
+    var keys = options1.concat(options2.filter(function (item) {
+      return options1.indexOf(item) < 0;
+    }));
+
+    this.cache[controlName] = keys;
+
+    return keys;
+  };
+
+  ControlProperties.prototype.getWidgetProperties = function getWidgetProperties(controlName) {
+    if (jQuery.fn[controlName]) {
+      return Object.keys(jQuery.fn[controlName].widget.prototype.options);
+    }
+
+    return [];
+  };
+
+  ControlProperties.prototype.getTemplateProperties = function getTemplateProperties(controlName) {
+    var properties = this.getProperties(controlName);
+
+    var templates = properties.filter(function (prop) {
+      return prop.toLowerCase().indexOf('template') >= -1;
+    });
+
+    return templates;
+  };
+
+  return ControlProperties;
+})();
+
+exports.ControlProperties = ControlProperties;
+
 function generateBindables(controlName) {
   return function (target, key, descriptor) {
-    var options = jQuery.fn[controlName].widget.prototype.options;
-
     var behaviorResource = _aureliaMetadata.metadata.getOrCreateOwn(_aureliaMetadata.metadata.resource, _aureliaTemplating.HtmlBehaviorResource, target);
-    var optionKeys = Object.keys(options);
-    optionKeys.push('dataSource');
+    var controlProperties = (_aureliaDependencyInjection.Container.instance || new _aureliaDependencyInjection.Container()).get(ControlProperties);
+    var optionKeys = controlProperties.getProperties(controlName);
+
+    optionKeys.push('widget');
 
     for (var _iterator = optionKeys, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
       var _ref;
@@ -443,41 +366,117 @@ function generateBindables(controlName) {
         name: getBindablePropertyName(option)
       };
 
+      if (option === 'widget') {
+        nameOrConfigOrTarget.defaultBindingMode = _aureliaBinding.bindingMode.twoWay;
+      }
+
       var prop = new _aureliaTemplating.BindableProperty(nameOrConfigOrTarget);
       prop.registerWith(target, behaviorResource, descriptor);
     }
   };
 }
 
-function fireEvent(element, name) {
-  var data = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+var Template = (function () {
+  var _instanceInitializers4 = {};
 
-  var event = new CustomEvent(name, {
-    detail: data,
-    bubbles: true
-  });
-  element.dispatchEvent(event);
+  _createDecoratedClass(Template, [{
+    key: 'template',
+    decorators: [_aureliaTemplating.bindable],
+    initializer: null,
+    enumerable: true
+  }, {
+    key: 'for',
+    decorators: [_aureliaTemplating.bindable],
+    initializer: function initializer() {
+      return 'template';
+    },
+    enumerable: true
+  }], null, _instanceInitializers4);
 
-  return event;
-}
+  function Template(targetInstruction) {
+    _classCallCheck(this, _Template);
 
-function fireKendoEvent(element, name) {
-  var data = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+    _defineDecoratedPropertyDescriptor(this, 'template', _instanceInitializers4);
 
-  return fireEvent(element, '' + constants.eventPrefix + name, data);
-}
+    _defineDecoratedPropertyDescriptor(this, 'for', _instanceInitializers4);
 
-function pruneOptions(options) {
-  var returnOptions = {};
-
-  for (var prop in options) {
-    if (options.hasOwnProperty(prop) && options[prop] !== null) {
-      returnOptions[prop] = options[prop];
-    }
+    this.template = targetInstruction.elementInstruction.template;
   }
 
-  return returnOptions;
-}
+  var _Template = Template;
+  Template = _aureliaDependencyInjection.inject(_aureliaTemplating.TargetInstruction)(Template) || Template;
+  Template = _aureliaTemplating.processContent(function (compiler, resources, element, instruction) {
+    var html = element.innerHTML;
+    if (html !== '') {
+      instruction.template = html;
+    }
+    return true;
+  })(Template) || Template;
+  Template = _aureliaTemplating.noView()(Template) || Template;
+  Template = _aureliaTemplating.customElement(constants.elementPrefix + 'template')(Template) || Template;
+  return Template;
+})();
+
+exports.Template = Template;
+
+var OptionsBuilder = (function () {
+  function OptionsBuilder(controlProperties) {
+    _classCallCheck(this, _OptionsBuilder);
+
+    this.controlProperties = controlProperties;
+  }
+
+  OptionsBuilder.prototype.getOptions = function getOptions(viewModel, className) {
+    var _this2 = this;
+
+    var options = {};
+
+    var _loop = function () {
+      if (_isArray2) {
+        if (_i2 >= _iterator2.length) return 'break';
+        _ref2 = _iterator2[_i2++];
+      } else {
+        _i2 = _iterator2.next();
+        if (_i2.done) return 'break';
+        _ref2 = _i2.value;
+      }
+
+      var prop = _ref2;
+
+      var value = viewModel[getBindablePropertyName(prop)];
+
+      if (hasValue(value)) {
+        if (_this2.isTemplate(prop)) {
+          options[prop] = function () {
+            return value;
+          };
+        } else {
+          options[prop] = value;
+        }
+      }
+    };
+
+    for (var _iterator2 = this.controlProperties.getProperties(className), _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
+      var _ref2;
+
+      var _ret = _loop();
+
+      if (_ret === 'break') break;
+    }
+
+    return pruneOptions(options);
+  };
+
+  OptionsBuilder.prototype.isTemplate = function isTemplate(propertyName) {
+    return propertyName.toLowerCase().indexOf('template') > -1;
+  };
+
+  var _OptionsBuilder = OptionsBuilder;
+  OptionsBuilder = _aureliaDependencyInjection.inject(ControlProperties)(OptionsBuilder) || OptionsBuilder;
+  return OptionsBuilder;
+})();
+
+exports.OptionsBuilder = OptionsBuilder;
 
 var TemplateCompiler = (function () {
   function TemplateCompiler(templatingEngine) {
@@ -505,7 +504,8 @@ var TemplateCompiler = (function () {
   TemplateCompiler.prototype.handleTemplateEvents = function handleTemplateEvents(widget, _event, _args) {
     if (_event !== 'compile' && _event !== 'cleanup') return;
 
-    var $parent = widget._$parent;
+    var $parent = widget._$parent || (widget.options._$parent ? widget.options._$parent[0] : undefined);
+    var viewResources = widget._$resources || (widget.options._$resources ? widget.options._$resources[0] : undefined);
 
     if (!$parent) return;
 
@@ -515,7 +515,7 @@ var TemplateCompiler = (function () {
 
     switch (_event) {
       case 'compile':
-        this.compile($parent, elements, data);
+        this.compile($parent, elements, data, viewResources);
         break;
 
       case 'cleanup':
@@ -527,38 +527,50 @@ var TemplateCompiler = (function () {
     }
   };
 
-  TemplateCompiler.prototype.compile = function compile($parent, elements, data) {
+  TemplateCompiler.prototype.compile = function compile($parent, elements, data, viewResources) {
     var _this3 = this;
 
-    var _loop = function (i) {
+    var _loop2 = function (i) {
       var element = elements[i];
       var ctx = undefined;
 
       if (data && data[i]) {
         var _data = data[i];
-        ctx = _data.dataItem;
+        ctx = _data.dataItem || _data.aggregate || _data;
       }
 
       if (element instanceof jQuery) {
         element.each(function (index, elem) {
-          return _this3.enhanceView($parent, elem, ctx);
+          return _this3.enhanceView($parent, elem, ctx, viewResources);
         });
       } else {
-        _this3.enhanceView($parent, element, ctx);
+        _this3.enhanceView($parent, element, ctx, viewResources);
       }
     };
 
     for (var i = 0; i < elements.length; i++) {
-      _loop(i);
+      _loop2(i);
     }
   };
 
-  TemplateCompiler.prototype.enhanceView = function enhanceView($parent, element, ctx) {
-    var view = this.templatingEngine.enhance(element);
+  TemplateCompiler.prototype.enhanceView = function enhanceView($parent, element, ctx, viewResources) {
+    var view = $(element).data('viewInstance');
+
+    if (element.querySelectorAll('.au-target').length === 0) {
+      if (viewResources) {
+        view = this.templatingEngine.enhance({
+          element: element,
+          resources: viewResources
+        });
+      } else {
+        view = this.templatingEngine.enhance(element);
+      }
+
+      $(element).data('viewInstance', view);
+    }
 
     view.bind(ctx, $parent);
     view.attached();
-    $(element).data('viewInstance', view);
   };
 
   TemplateCompiler.prototype.cleanup = function cleanup(elements) {
@@ -579,7 +591,7 @@ var TemplateCompiler = (function () {
   };
 
   var _TemplateCompiler = TemplateCompiler;
-  TemplateCompiler = _aureliaFramework.inject(_aureliaTemplating.TemplatingEngine)(TemplateCompiler) || TemplateCompiler;
+  TemplateCompiler = _aureliaDependencyInjection.inject(_aureliaTemplating.TemplatingEngine)(TemplateCompiler) || TemplateCompiler;
   return TemplateCompiler;
 })();
 
@@ -607,23 +619,29 @@ function getBindablePropertyName(propertyName) {
   return _unhyphenate(name);
 }
 
+function getKendoPropertyName(propertyName) {
+  var withoutPrefix = propertyName.substring(1);
+
+  return withoutPrefix.charAt(0).toLowerCase() + withoutPrefix.slice(1);
+}
+
 function getEventsFromAttributes(element) {
   var attributes = Array.prototype.slice.call(element.attributes);
   var events = [];
 
-  for (var _iterator2 = attributes, _isArray2 = Array.isArray(_iterator2), _i2 = 0, _iterator2 = _isArray2 ? _iterator2 : _iterator2[Symbol.iterator]();;) {
-    var _ref2;
+  for (var _iterator3 = attributes, _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
+    var _ref3;
 
-    if (_isArray2) {
-      if (_i2 >= _iterator2.length) break;
-      _ref2 = _iterator2[_i2++];
+    if (_isArray3) {
+      if (_i3 >= _iterator3.length) break;
+      _ref3 = _iterator3[_i3++];
     } else {
-      _i2 = _iterator2.next();
-      if (_i2.done) break;
-      _ref2 = _i2.value;
+      _i3 = _iterator3.next();
+      if (_i3.done) break;
+      _ref3 = _i3.value;
     }
 
-    var attribute = _ref2;
+    var attribute = _ref3;
 
     var attributeName = attribute.name;
     if (!attributeName.startsWith(constants.eventPrefix)) continue;
@@ -640,396 +658,288 @@ function getEventsFromAttributes(element) {
   return events;
 }
 
+function pruneOptions(options) {
+  var returnOptions = {};
+
+  for (var prop in options) {
+    if (hasValue(options[prop])) {
+      returnOptions[prop] = options[prop];
+    }
+  }
+
+  return returnOptions;
+}
+
+function hasValue(prop) {
+  return typeof prop !== 'undefined' && prop !== null;
+}
+
+function _useTemplates(target, controlName, templates) {
+  var controlProperties = (_aureliaDependencyInjection.Container.instance || new _aureliaDependencyInjection.Container()).get(ControlProperties);
+  var templateProps = controlProperties.getTemplateProperties(controlName);
+
+  templates.forEach(function (c) {
+    if (templateProps.indexOf(c['for']) > -1) {
+      target[getBindablePropertyName(c['for'])] = c.template;
+    } else {
+      throw new Error('Invalid template property name: "' + c['for'] + '", valid values are: ' + templateProps.join(', '));
+    }
+  });
+}
+
+function fireEvent(element, name) {
+  var data = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+  var event = new CustomEvent(name, {
+    detail: data,
+    bubbles: true
+  });
+  element.dispatchEvent(event);
+
+  return event;
+}
+
+function fireKendoEvent(element, name) {
+  var data = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+  return fireEvent(element, '' + constants.eventPrefix + name, data);
+}
+
 var WidgetBase = (function () {
-  function WidgetBase(controlName, element) {
-    _classCallCheck(this, WidgetBase);
+  function WidgetBase(taskQueue, templateCompiler, optionsBuilder) {
+    _classCallCheck(this, _WidgetBase);
 
-    var container = _aureliaDependencyInjection.Container.instance;
-    this.taskQueue = container.get(_aureliaFramework.TaskQueue);
-    this.templateCompiler = container.get(TemplateCompiler);
-    this.templateCompiler.initialize();
+    this.taskQueue = taskQueue;
+    this.optionsBuilder = optionsBuilder;
+    templateCompiler.initialize();
+  }
 
-    this.element = element;
-
-    this.target = this.element;
+  WidgetBase.prototype.control = function control(controlName) {
+    if (!controlName || !jQuery.fn[controlName]) {
+      throw new Error('The name of control ' + controlName + ' is invalid or not set');
+    }
 
     this.controlName = controlName;
 
-    this.setDefaultBindableValues();
-  }
+    var ctor = jQuery.fn[this.controlName];
+    this.kendoOptions = ctor.widget.prototype.options;
+    this.kendoEvents = ctor.widget.prototype.events;
 
-  WidgetBase.prototype.bind = function bind(ctx) {
-    this.$parent = ctx;
+    return this;
   };
 
-  WidgetBase.prototype._initialize = function _initialize() {
-    if (!this.$parent) {
-      throw new Error('$parent is not set. Did you call bind(ctx) on the widget base?');
+  WidgetBase.prototype.linkViewModel = function linkViewModel(viewModel) {
+    if (!viewModel) {
+      throw new Error('viewModel is not set');
     }
 
-    var target = jQuery(this.target);
+    this.viewModel = viewModel;
 
-    var ctor = target[this.controlName];
-
-    var options = this._getOptions(ctor);
-
-    this._beforeInitialize(options);
-
-    this.widget = ctor.call(target, options).data(this.controlName);
-
-    this.widget._$parent = this.$parent;
-
-    this._initialized();
+    return this;
   };
 
-  WidgetBase.prototype._beforeInitialize = function _beforeInitialize(options) {};
-
-  WidgetBase.prototype._initialized = function _initialized() {};
-
-  WidgetBase.prototype.recreate = function recreate() {
-    this._initialize();
-  };
-
-  WidgetBase.prototype._getOptions = function _getOptions(ctor) {
-    var options = this.getOptionsFromBindables();
-    var eventOptions = this.getEventOptions(ctor);
-
-    return Object.assign({}, this.options, pruneOptions(options), eventOptions);
-  };
-
-  WidgetBase.prototype.getOptionsFromBindables = function getOptionsFromBindables() {
-    var props = jQuery.fn[this.controlName].widget.prototype.options;
-    var options = {};
-
-    for (var _iterator3 = Object.keys(props), _isArray3 = Array.isArray(_iterator3), _i3 = 0, _iterator3 = _isArray3 ? _iterator3 : _iterator3[Symbol.iterator]();;) {
-      var _ref3;
-
-      if (_isArray3) {
-        if (_i3 >= _iterator3.length) break;
-        _ref3 = _iterator3[_i3++];
-      } else {
-        _i3 = _iterator3.next();
-        if (_i3.done) break;
-        _ref3 = _i3.value;
-      }
-
-      var prop = _ref3;
-
-      options[prop] = this[getBindablePropertyName(prop)];
+  WidgetBase.prototype.useViewResources = function useViewResources(resources) {
+    if (!resources) {
+      throw new Error('resources is not set');
     }
 
-    if (this.kDataSource) {
-      options.dataSource = this.kDataSource;
-    }
+    this.viewResources = resources;
 
-    return options;
+    return this;
   };
 
-  WidgetBase.prototype.setDefaultBindableValues = function setDefaultBindableValues() {
-    var props = jQuery.fn[this.controlName].widget.prototype.options;
+  WidgetBase.prototype.useValueBinding = function useValueBinding() {
+    this.withValueBinding = true;
 
-    for (var _iterator4 = Object.keys(props), _isArray4 = Array.isArray(_iterator4), _i4 = 0, _iterator4 = _isArray4 ? _iterator4 : _iterator4[Symbol.iterator]();;) {
-      var _ref4;
-
-      if (_isArray4) {
-        if (_i4 >= _iterator4.length) break;
-        _ref4 = _iterator4[_i4++];
-      } else {
-        _i4 = _iterator4.next();
-        if (_i4.done) break;
-        _ref4 = _i4.value;
-      }
-
-      var prop = _ref4;
-
-      this[getBindablePropertyName(prop)] = props[prop];
-    }
+    return this;
   };
 
-  WidgetBase.prototype.getEventOptions = function getEventOptions(ctor) {
+  WidgetBase.prototype.createWidget = function createWidget(options) {
     var _this4 = this;
 
-    var options = {};
-    var allowedEvents = ctor.widget.prototype.events;
+    if (!options) {
+      throw new Error('the createWidget() function needs to be called with an object');
+    }
 
-    var events = getEventsFromAttributes(this.element);
+    if (!options.element) {
+      throw new Error('element is not set');
+    }
+
+    if (!options.parentCtx) {
+      throw new Error('parentCtx is not set');
+    }
+
+    var allOptions = this._getOptions(options.rootElement || options.element);
+
+    if (options.beforeInitialize) {
+      options.beforeInitialize(allOptions);
+    }
+
+    Object.assign(allOptions, {
+      _$parent: [options.parentCtx],
+      _$resources: [this.viewResources]
+    });
+
+    var widget = this._createWidget(options.element, allOptions, this.controlName);
+
+    widget._$parent = options.parentCtx;
+    widget._$resources = this.viewResources;
+
+    if (this.withValueBinding) {
+      widget.first('change', function (args) {
+        return _this4._handleChange(args.sender);
+      });
+
+      this._handleChange(widget);
+    }
+
+    if (options.afterInitialize) {
+      options.afterInitialize();
+    }
+
+    return widget;
+  };
+
+  WidgetBase.prototype._createWidget = function _createWidget(element, options, controlName) {
+    return jQuery(element)[controlName](options).data(controlName);
+  };
+
+  WidgetBase.prototype._getOptions = function _getOptions(element) {
+    var options = this.optionsBuilder.getOptions(this.viewModel, this.controlName);
+    var eventOptions = this.getEventOptions(element);
+
+    return pruneOptions(Object.assign({}, this.viewModel.options, options, eventOptions));
+  };
+
+  WidgetBase.prototype.getEventOptions = function getEventOptions(element) {
+    var _this5 = this;
+
+    var options = {};
+    var allowedEvents = this.kendoEvents;
+    var delayedExecution = ['change'];
+
+    var events = getEventsFromAttributes(element);
 
     events.forEach(function (event) {
       if (!allowedEvents.includes(event)) {
-        throw new Error(event + ' is not an event on the ' + _this4.controlName + ' control');
+        throw new Error(event + ' is not an event on the ' + _this5.controlName + ' control');
       }
 
-      options[event] = function (e) {
-        _this4.taskQueue.queueMicroTask(function () {
-          fireKendoEvent(_this4.target, _hyphenate(event), e);
-        });
-      };
+      if (delayedExecution.includes(event)) {
+        options[event] = function (e) {
+          _this5.taskQueue.queueMicroTask(function () {
+            return fireKendoEvent(element, _hyphenate(event), e);
+          });
+        };
+      } else {
+        options[event] = function (e) {
+          return fireKendoEvent(element, _hyphenate(event), e);
+        };
+      }
     });
 
     return options;
   };
 
-  WidgetBase.prototype.detached = function detached() {
-    if (this.widget) {
-      this.widget.destroy();
+  WidgetBase.prototype._handleChange = function _handleChange(widget) {
+    this.viewModel.kValue = widget.value();
+  };
+
+  WidgetBase.prototype.handlePropertyChanged = function handlePropertyChanged(widget, property, newValue, oldValue) {
+    if (property === 'kValue' && this.withValueBinding) {
+      widget.value(newValue);
     }
   };
 
+  WidgetBase.prototype.useTemplates = function useTemplates(target, controlName, templates) {
+    return _useTemplates(target, controlName, templates);
+  };
+
+  WidgetBase.prototype.destroy = function destroy(widget) {
+    widget.destroy();
+  };
+
+  var _WidgetBase = WidgetBase;
+  WidgetBase = _aureliaDependencyInjection.inject(_aureliaTaskQueue.TaskQueue, TemplateCompiler, OptionsBuilder)(WidgetBase) || WidgetBase;
+  WidgetBase = _aureliaDependencyInjection.transient()(WidgetBase) || WidgetBase;
   return WidgetBase;
 })();
 
 exports.WidgetBase = WidgetBase;
 
-var Grid = (function (_WidgetBase4) {
-  var _instanceInitializers4 = {};
-
-  _inherits(Grid, _WidgetBase4);
+var Grid = (function () {
+  var _instanceInitializers5 = {};
 
   _createDecoratedClass(Grid, [{
     key: 'columns',
-    decorators: [_aureliaFramework.children('au-col')],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'kDataSource',
-    decorators: [_aureliaFramework.bindable],
+    decorators: [_aureliaTemplating.children(constants.elementPrefix + 'col')],
     initializer: null,
     enumerable: true
   }, {
     key: 'options',
-    decorators: [_aureliaFramework.bindable],
+    decorators: [_aureliaTemplating.bindable],
     initializer: function initializer() {
       return {};
     },
     enumerable: true
-  }], null, _instanceInitializers4);
+  }], null, _instanceInitializers5);
 
-  function Grid(element) {
+  function Grid(element, widgetBase, viewResources, optionsBuilder) {
     _classCallCheck(this, _Grid);
 
-    _WidgetBase4.call(this, 'kendoGrid', element);
+    _defineDecoratedPropertyDescriptor(this, 'columns', _instanceInitializers5);
 
-    _defineDecoratedPropertyDescriptor(this, 'columns', _instanceInitializers4);
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers5);
 
-    _defineDecoratedPropertyDescriptor(this, 'kDataSource', _instanceInitializers4);
-
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers4);
+    this.element = element;
+    this.optionsBuilder = optionsBuilder;
+    this.widgetBase = widgetBase.control('kendoGrid').linkViewModel(this).useViewResources(viewResources);
   }
 
-  Grid.prototype.attached = function attached() {
-    this._initialize();
+  Grid.prototype.bind = function bind(ctx) {
+    this.$parent = ctx;
   };
 
-  Grid.prototype._initialize = function _initialize() {
-    this.target = isInitFromTable(this.element) ? this.element.children[0] : this.element;
+  Grid.prototype.attached = function attached() {
+    this.recreate();
+  };
 
-    _WidgetBase4.prototype._initialize.call(this);
+  Grid.prototype.recreate = function recreate() {
+    var _this6 = this;
+
+    var element = isInitFromTable(this.element) ? this.element.children[0] : this.element;
+
+    this.kWidget = this.widgetBase.createWidget({
+      element: element,
+      parentCtx: this.$parent,
+      beforeInitialize: function beforeInitialize(o) {
+        return _this6._beforeInitialize(o);
+      }
+    });
   };
 
   Grid.prototype._beforeInitialize = function _beforeInitialize(options) {
+    var _this7 = this;
+
     if (this.columns && this.columns.length > 0) {
-      options.columns = this.columns;
+      options.columns = [];
+
+      this.columns.forEach(function (column) {
+        options.columns.push(_this7.optionsBuilder.getOptions(column, 'GridColumn'));
+      });
     }
   };
 
-  Grid.prototype.enableChanged = function enableChanged(newValue) {
-    if (this.widget) {
-      this.widget.enable(newValue);
-    }
-  };
-
-  Grid.prototype.addRow = function addRow() {
-    if (this.widget) {
-      this.widget.addRow();
-    }
-  };
-
-  Grid.prototype.autoFitColumn = function autoFitColumn(value) {
-    if (this.widget) {
-      this.widget.autoFitColumn(value);
-    }
-  };
-
-  Grid.prototype.cancelChanges = function cancelChanges() {
-    if (this.widget) {
-      this.widget.cancelChanges();
-    }
-  };
-
-  Grid.prototype.cancelRow = function cancelRow() {
-    if (this.widget) {
-      this.widget.cancelRow();
-    }
-  };
-
-  Grid.prototype.cellIndex = function cellIndex(cell) {
-    if (this.widget) {
-      return this.widget.cellIndex(cell);
-    }
-  };
-
-  Grid.prototype.clearSelection = function clearSelection() {
-    if (this.widget) {
-      this.widget.clearSelection();
-    }
-  };
-
-  Grid.prototype.closeCell = function closeCell() {
-    if (this.widget) {
-      this.widget.closeCell();
-    }
-  };
-
-  Grid.prototype.collapseGroup = function collapseGroup(group) {
-    if (this.widget) {
-      this.widget.collapseGroup(group);
-    }
-  };
-
-  Grid.prototype.collapseRow = function collapseRow(row) {
-    if (this.widget) {
-      this.widget.collapseRow(row);
-    }
-  };
-
-  Grid.prototype.current = function current(cell) {
-    if (this.widget) {
-      return this.widget.current(cell);
-    }
-  };
-
-  Grid.prototype.dataItem = function dataItem(row) {
-    if (this.widget) {
-      return this.widget.dataItem(row);
-    }
-  };
-
-  Grid.prototype.destroy = function destroy() {
-    if (this.widget) {
-      this.widget.destroy();
-    }
-  };
-
-  Grid.prototype.editCell = function editCell(cell) {
-    if (this.widget) {
-      this.widget.editCell(cell);
-    }
-  };
-
-  Grid.prototype.editRow = function editRow(row) {
-    if (this.widget) {
-      this.widget.editRow(row);
-    }
-  };
-
-  Grid.prototype.expandGroup = function expandGroup(row) {
-    if (this.widget) {
-      this.widget.expandGroup(row);
-    }
-  };
-
-  Grid.prototype.expandRow = function expandRow(row) {
-    if (this.widget) {
-      this.widget.expandRow(row);
-    }
-  };
-
-  Grid.prototype.getOptions = function getOptions() {
-    if (this.widget) {
-      return this.widget.getOptions();
-    }
-  };
-
-  Grid.prototype.hideColumn = function hideColumn(column) {
-    if (this.widget) {
-      this.widget.hideColumn(column);
-    }
-  };
-
-  Grid.prototype.lockColumn = function lockColumn(column) {
-    if (this.widget) {
-      this.widget.lockColumn(column);
-    }
-  };
-
-  Grid.prototype.refresh = function refresh() {
-    if (this.widget) {
-      this.widget.refresh();
-    }
-  };
-
-  Grid.prototype.removeRow = function removeRow(row) {
-    if (this.widget) {
-      this.widget.removeRow(row);
-    }
-  };
-
-  Grid.prototype.reorderColumn = function reorderColumn(destIndex, column) {
-    if (this.widget) {
-      this.widget.reorderColumn(destIndex, column);
-    }
-  };
-
-  Grid.prototype.saveAsExcel = function saveAsExcel() {
-    if (this.widget) {
-      this.widget.saveAsExcel();
-    }
-  };
-
-  Grid.prototype.saveAsPDF = function saveAsPDF() {
-    if (this.widget) {
-      this.widget.saveAsPDF();
-    }
-  };
-
-  Grid.prototype.saveChanges = function saveChanges() {
-    if (this.widget) {
-      this.widget.saveChanges();
-    }
-  };
-
-  Grid.prototype.saveRow = function saveRow() {
-    if (this.widget) {
-      this.widget.saveRow();
-    }
-  };
-
-  Grid.prototype.select = function select(rows) {
-    if (this.widget) {
-      return this.widget.select(rows);
-    }
-  };
-
-  Grid.prototype.setDataSource = function setDataSource(dataSource) {
-    if (this.widget) {
-      this.widget.setDataSource(dataSource);
-    }
-  };
-
-  Grid.prototype.setOptions = function setOptions(options) {
-    if (this.widget) {
-      this.widget.setOptions(options);
-    }
-  };
-
-  Grid.prototype.showColumn = function showColumn(column) {
-    if (this.widget) {
-      this.widget.showColumn(column);
-    }
-  };
-
-  Grid.prototype.unlockColumn = function unlockColumn(column) {
-    if (this.widget) {
-      this.widget.unlockColumn(column);
-    }
+  Grid.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
   };
 
   var _Grid = Grid;
-  Grid = _aureliaFramework.inject(Element)(Grid) || Grid;
+  Grid = _aureliaDependencyInjection.inject(Element, WidgetBase, _aureliaTemplating.ViewResources, OptionsBuilder)(Grid) || Grid;
   Grid = generateBindables('kendoGrid')(Grid) || Grid;
-  Grid = _aureliaFramework.customElement('k-grid')(Grid) || Grid;
+  Grid = _aureliaTemplating.customElement(constants.elementPrefix + 'grid')(Grid) || Grid;
   return Grid;
-})(WidgetBase);
+})();
 
 exports.Grid = Grid;
 
@@ -1037,199 +947,30 @@ function isInitFromTable(element) {
   return element.children.length > 0 && element.children[0].nodeName === 'TABLE';
 }
 
-var AuCol = (function () {
-  var _instanceInitializers5 = {};
+var Col = (function () {
+  var _instanceInitializers6 = {};
 
-  _createDecoratedClass(AuCol, [{
-    key: 'aggregates',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'attributes',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'columns',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'command',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'editor',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'encoded',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'field',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'filterable',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'footerTemplate',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'format',
-    decorators: [_aureliaFramework.bindable],
-    initializer: function initializer() {
-      return '';
-    },
-    enumerable: true
-  }, {
-    key: 'groupable',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'groupFooterTemplate',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'groupHeaderTemplate',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'headerAttributes',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'headerTemplate',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'hidden',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'lockable',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'locked',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'menu',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'minScreenWidth',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'sortable',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'title',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'values',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }, {
-    key: 'width',
-    decorators: [_aureliaFramework.bindable],
-    initializer: null,
-    enumerable: true
-  }], null, _instanceInitializers5);
+  function Col() {
+    _classCallCheck(this, _Col);
 
-  function AuCol(targetInstruction) {
-    _classCallCheck(this, _AuCol);
-
-    _defineDecoratedPropertyDescriptor(this, 'aggregates', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'attributes', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'columns', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'command', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'editor', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'encoded', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'field', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'filterable', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'footerTemplate', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'format', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'groupable', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'groupFooterTemplate', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'groupHeaderTemplate', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'headerAttributes', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'headerTemplate', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'hidden', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'lockable', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'locked', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'menu', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'minScreenWidth', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'sortable', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'title', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'values', _instanceInitializers5);
-
-    _defineDecoratedPropertyDescriptor(this, 'width', _instanceInitializers5);
-
-    this.template = targetInstruction.elementInstruction.template;
+    _defineDecoratedPropertyDescriptor(this, 'templates', _instanceInitializers6);
   }
 
-  var _AuCol = AuCol;
-  AuCol = _aureliaFramework.inject(_aureliaFramework.TargetInstruction)(AuCol) || AuCol;
-  AuCol = _aureliaFramework.processContent(function (compiler, resources, element, instruction) {
-    var html = element.innerHTML;
-    if (html !== '') {
-      instruction.template = html;
-    }
+  Col.prototype.bind = function bind() {
+    _useTemplates(this, 'GridColumn', this.templates);
+  };
 
-    return true;
-  })(AuCol) || AuCol;
-  AuCol = _aureliaFramework.noView(AuCol) || AuCol;
-  return AuCol;
+  _createDecoratedClass(Col, [{
+    key: 'templates',
+    decorators: [_aureliaTemplating.children(constants.elementPrefix + 'template')],
+    initializer: null,
+    enumerable: true
+  }], null, _instanceInitializers6);
+
+  var _Col = Col;
+  Col = generateBindables('GridColumn')(Col) || Col;
+  Col = _aureliaTemplating.customElement(constants.elementPrefix + 'col')(Col) || Col;
+  return Col;
 })();
 
-exports.AuCol = AuCol;
+exports.Col = Col;

@@ -1,75 +1,43 @@
-import {customElement, bindable, inject} from 'aurelia-framework';
+import {inject} from 'aurelia-dependency-injection';
+import {customElement, bindable} from 'aurelia-templating';
 import {WidgetBase} from '../common/widget-base';
 import {generateBindables} from '../common/decorators';
-import 'kendo-ui/js/kendo.dataviz.chart.min';
+import {constants} from '../common/constants';
+import {PDF} from '../pdf/pdf'; //eslint-disable-line no-unused-vars
+import 'kendo.dataviz.chart.min';
+import 'kendo.dataviz.chart.polar.min';
+import 'kendo.dataviz.chart.funnel.min';
 
-@customElement('k-chart')
+@customElement(`${constants.elementPrefix}chart`)
 @generateBindables('kendoChart')
-@inject(Element)
-export class Chart extends WidgetBase {
+@inject(Element, WidgetBase)
+export class Chart {
 
-  @bindable kDataSource;
   @bindable options = {};
 
-  constructor(element) {
-    super('kendoChart', element);
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoChart')
+                        .linkViewModel(this);
+  }
+
+  bind(ctx) {
+    this.$parent = ctx;
   }
 
   attached() {
-    this._initialize();
+    this.recreate();
   }
 
-  getAxis(name) {
-    if (this.widget) {
-      return this.widget.getAxis(name);
-    }
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
   }
 
-  redraw() {
-    if (this.widget) {
-      return this.widget.redraw();
-    }
-  }
-
-  refresh() {
-    if (this.widget) {
-      return this.widget.refresh();
-    }
-  }
-
-  resize() {
-    if (this.widget) {
-      return this.widget.resize();
-    }
-  }
-
-  setDataSource(dataSource) {
-    if (this.widget) {
-      return this.widget.setDataSource(dataSource);
-    }
-  }
-
-  setOptions(value) {
-    if (this.widget) {
-      return this.widget.setOptions(value);
-    }
-  }
-
-  imageDataURL() {
-    if (this.widget) {
-      return this.widget.imageDataURL();
-    }
-  }
-
-  toggleHighlight(show, options) {
-    if (this.widget) {
-      return this.widget.toggleHighlight(show, options);
-    }
-  }
-
-  destroy() {
-    if (this.widget) {
-      return this.widget.destroy();
-    }
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
   }
 }

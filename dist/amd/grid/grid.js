@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-framework', '../common/widget-base', '../common/decorators', 'kendo-ui/js/kendo.data.signalr.min', 'kendo-ui/js/kendo.filtercell.min', 'kendo-ui/js/kendo.grid.min'], function (exports, _aureliaFramework, _commonWidgetBase, _commonDecorators, _kendoUiJsKendoDataSignalrMin, _kendoUiJsKendoFiltercellMin, _kendoUiJsKendoGridMin) {
+define(['exports', 'aurelia-dependency-injection', 'aurelia-templating', '../common/widget-base', '../common/decorators', '../common/constants', '../common/options-builder', '../pdf/pdf', 'kendo.data.signalr.min', 'kendo.filtercell.min', 'kendo.grid.min'], function (exports, _aureliaDependencyInjection, _aureliaTemplating, _commonWidgetBase, _commonDecorators, _commonConstants, _commonOptionsBuilder, _pdfPdf, _kendoDataSignalrMin, _kendoFiltercellMin, _kendoGridMin) {
   'use strict';
 
   exports.__esModule = true;
@@ -7,260 +7,81 @@ define(['exports', 'aurelia-framework', '../common/widget-base', '../common/deco
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
   function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer ? descriptor.initializer.call(target) : undefined; Object.defineProperty(target, key, descriptor); }
 
-  var Grid = (function (_WidgetBase) {
+  var Grid = (function () {
     var _instanceInitializers = {};
-
-    _inherits(Grid, _WidgetBase);
 
     _createDecoratedClass(Grid, [{
       key: 'columns',
-      decorators: [_aureliaFramework.children('au-col')],
-      initializer: null,
-      enumerable: true
-    }, {
-      key: 'kDataSource',
-      decorators: [_aureliaFramework.bindable],
+      decorators: [_aureliaTemplating.children(_commonConstants.constants.elementPrefix + 'col')],
       initializer: null,
       enumerable: true
     }, {
       key: 'options',
-      decorators: [_aureliaFramework.bindable],
+      decorators: [_aureliaTemplating.bindable],
       initializer: function initializer() {
         return {};
       },
       enumerable: true
     }], null, _instanceInitializers);
 
-    function Grid(element) {
+    function Grid(element, widgetBase, viewResources, optionsBuilder) {
       _classCallCheck(this, _Grid);
-
-      _WidgetBase.call(this, 'kendoGrid', element);
 
       _defineDecoratedPropertyDescriptor(this, 'columns', _instanceInitializers);
 
-      _defineDecoratedPropertyDescriptor(this, 'kDataSource', _instanceInitializers);
-
       _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers);
+
+      this.element = element;
+      this.optionsBuilder = optionsBuilder;
+      this.widgetBase = widgetBase.control('kendoGrid').linkViewModel(this).useViewResources(viewResources);
     }
 
-    Grid.prototype.attached = function attached() {
-      this._initialize();
+    Grid.prototype.bind = function bind(ctx) {
+      this.$parent = ctx;
     };
 
-    Grid.prototype._initialize = function _initialize() {
-      this.target = isInitFromTable(this.element) ? this.element.children[0] : this.element;
+    Grid.prototype.attached = function attached() {
+      this.recreate();
+    };
 
-      _WidgetBase.prototype._initialize.call(this);
+    Grid.prototype.recreate = function recreate() {
+      var _this = this;
+
+      var element = isInitFromTable(this.element) ? this.element.children[0] : this.element;
+
+      this.kWidget = this.widgetBase.createWidget({
+        element: element,
+        parentCtx: this.$parent,
+        beforeInitialize: function beforeInitialize(o) {
+          return _this._beforeInitialize(o);
+        }
+      });
     };
 
     Grid.prototype._beforeInitialize = function _beforeInitialize(options) {
+      var _this2 = this;
+
       if (this.columns && this.columns.length > 0) {
-        options.columns = this.columns;
+        options.columns = [];
+
+        this.columns.forEach(function (column) {
+          options.columns.push(_this2.optionsBuilder.getOptions(column, 'GridColumn'));
+        });
       }
     };
 
-    Grid.prototype.enableChanged = function enableChanged(newValue) {
-      if (this.widget) {
-        this.widget.enable(newValue);
-      }
-    };
-
-    Grid.prototype.addRow = function addRow() {
-      if (this.widget) {
-        this.widget.addRow();
-      }
-    };
-
-    Grid.prototype.autoFitColumn = function autoFitColumn(value) {
-      if (this.widget) {
-        this.widget.autoFitColumn(value);
-      }
-    };
-
-    Grid.prototype.cancelChanges = function cancelChanges() {
-      if (this.widget) {
-        this.widget.cancelChanges();
-      }
-    };
-
-    Grid.prototype.cancelRow = function cancelRow() {
-      if (this.widget) {
-        this.widget.cancelRow();
-      }
-    };
-
-    Grid.prototype.cellIndex = function cellIndex(cell) {
-      if (this.widget) {
-        return this.widget.cellIndex(cell);
-      }
-    };
-
-    Grid.prototype.clearSelection = function clearSelection() {
-      if (this.widget) {
-        this.widget.clearSelection();
-      }
-    };
-
-    Grid.prototype.closeCell = function closeCell() {
-      if (this.widget) {
-        this.widget.closeCell();
-      }
-    };
-
-    Grid.prototype.collapseGroup = function collapseGroup(group) {
-      if (this.widget) {
-        this.widget.collapseGroup(group);
-      }
-    };
-
-    Grid.prototype.collapseRow = function collapseRow(row) {
-      if (this.widget) {
-        this.widget.collapseRow(row);
-      }
-    };
-
-    Grid.prototype.current = function current(cell) {
-      if (this.widget) {
-        return this.widget.current(cell);
-      }
-    };
-
-    Grid.prototype.dataItem = function dataItem(row) {
-      if (this.widget) {
-        return this.widget.dataItem(row);
-      }
-    };
-
-    Grid.prototype.destroy = function destroy() {
-      if (this.widget) {
-        this.widget.destroy();
-      }
-    };
-
-    Grid.prototype.editCell = function editCell(cell) {
-      if (this.widget) {
-        this.widget.editCell(cell);
-      }
-    };
-
-    Grid.prototype.editRow = function editRow(row) {
-      if (this.widget) {
-        this.widget.editRow(row);
-      }
-    };
-
-    Grid.prototype.expandGroup = function expandGroup(row) {
-      if (this.widget) {
-        this.widget.expandGroup(row);
-      }
-    };
-
-    Grid.prototype.expandRow = function expandRow(row) {
-      if (this.widget) {
-        this.widget.expandRow(row);
-      }
-    };
-
-    Grid.prototype.getOptions = function getOptions() {
-      if (this.widget) {
-        return this.widget.getOptions();
-      }
-    };
-
-    Grid.prototype.hideColumn = function hideColumn(column) {
-      if (this.widget) {
-        this.widget.hideColumn(column);
-      }
-    };
-
-    Grid.prototype.lockColumn = function lockColumn(column) {
-      if (this.widget) {
-        this.widget.lockColumn(column);
-      }
-    };
-
-    Grid.prototype.refresh = function refresh() {
-      if (this.widget) {
-        this.widget.refresh();
-      }
-    };
-
-    Grid.prototype.removeRow = function removeRow(row) {
-      if (this.widget) {
-        this.widget.removeRow(row);
-      }
-    };
-
-    Grid.prototype.reorderColumn = function reorderColumn(destIndex, column) {
-      if (this.widget) {
-        this.widget.reorderColumn(destIndex, column);
-      }
-    };
-
-    Grid.prototype.saveAsExcel = function saveAsExcel() {
-      if (this.widget) {
-        this.widget.saveAsExcel();
-      }
-    };
-
-    Grid.prototype.saveAsPDF = function saveAsPDF() {
-      if (this.widget) {
-        this.widget.saveAsPDF();
-      }
-    };
-
-    Grid.prototype.saveChanges = function saveChanges() {
-      if (this.widget) {
-        this.widget.saveChanges();
-      }
-    };
-
-    Grid.prototype.saveRow = function saveRow() {
-      if (this.widget) {
-        this.widget.saveRow();
-      }
-    };
-
-    Grid.prototype.select = function select(rows) {
-      if (this.widget) {
-        return this.widget.select(rows);
-      }
-    };
-
-    Grid.prototype.setDataSource = function setDataSource(dataSource) {
-      if (this.widget) {
-        this.widget.setDataSource(dataSource);
-      }
-    };
-
-    Grid.prototype.setOptions = function setOptions(options) {
-      if (this.widget) {
-        this.widget.setOptions(options);
-      }
-    };
-
-    Grid.prototype.showColumn = function showColumn(column) {
-      if (this.widget) {
-        this.widget.showColumn(column);
-      }
-    };
-
-    Grid.prototype.unlockColumn = function unlockColumn(column) {
-      if (this.widget) {
-        this.widget.unlockColumn(column);
-      }
+    Grid.prototype.detached = function detached() {
+      this.widgetBase.destroy(this.kWidget);
     };
 
     var _Grid = Grid;
-    Grid = _aureliaFramework.inject(Element)(Grid) || Grid;
+    Grid = _aureliaDependencyInjection.inject(Element, _commonWidgetBase.WidgetBase, _aureliaTemplating.ViewResources, _commonOptionsBuilder.OptionsBuilder)(Grid) || Grid;
     Grid = _commonDecorators.generateBindables('kendoGrid')(Grid) || Grid;
-    Grid = _aureliaFramework.customElement('k-grid')(Grid) || Grid;
+    Grid = _aureliaTemplating.customElement(_commonConstants.constants.elementPrefix + 'grid')(Grid) || Grid;
     return Grid;
-  })(_commonWidgetBase.WidgetBase);
+  })();
 
   exports.Grid = Grid;
 

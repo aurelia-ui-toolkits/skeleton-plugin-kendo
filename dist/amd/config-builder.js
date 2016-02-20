@@ -14,12 +14,12 @@ define(['exports'], function (exports) {
     }
 
     KendoConfigBuilder.prototype.core = function core() {
-      this.kendoButton().kendoTabStrip().kendoProgressBar().kendoSlider().kendoColorPicker().kendoDropDownList();
+      this.kendoAutoComplete().kendoButton();
       return this;
     };
 
     KendoConfigBuilder.prototype.pro = function pro() {
-      this.core().kendoGrid().kendoAutoComplete().kendoChart();
+      this.core().kendoGrid().kendoChart();
       return this;
     };
 

@@ -1,43 +1,14 @@
-import {inject, noView, processContent, bindable, TargetInstruction} from 'aurelia-framework';
+import {children, customElement} from 'aurelia-templating';
+import {constants} from '../common/constants';
+import {generateBindables} from '../common/decorators';
+import {useTemplates} from '../common/util';
 
-@noView
-@processContent((compiler, resources, element, instruction) => {
-  let html = element.innerHTML;
-  if (html !== '') {
-    instruction.template = html;
-  }
+@customElement(`${constants.elementPrefix}col`)
+@generateBindables('GridColumn')
+export class Col {
+  @children(`${constants.elementPrefix}template`) templates;
 
-  return true;
-})
-@inject(TargetInstruction)
-export class AuCol {
-  @bindable aggregates;
-  @bindable attributes;
-  @bindable columns;
-  @bindable command;
-  @bindable editor;
-  @bindable encoded;
-  @bindable field;
-  @bindable filterable;
-  @bindable footerTemplate;
-  @bindable format = '';
-  @bindable groupable;
-  @bindable groupFooterTemplate;
-  @bindable groupHeaderTemplate;
-  @bindable headerAttributes;
-  @bindable headerTemplate;
-  @bindable hidden;
-  @bindable lockable;
-  @bindable locked;
-  @bindable menu;
-  @bindable minScreenWidth;
-  @bindable sortable;
-  @bindable title;
-  @bindable values;
-  @bindable width;
-  template;
-
-  constructor(targetInstruction) {
-    this.template = targetInstruction.elementInstruction.template;
+  bind() {
+    useTemplates(this, 'GridColumn', this.templates);
   }
 }

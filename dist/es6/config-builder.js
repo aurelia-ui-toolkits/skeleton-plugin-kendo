@@ -10,12 +10,8 @@ export class KendoConfigBuilder {
   * Globally register all Kendo Core wrappers
   */
   core(): KendoConfigBuilder {
-    this.kendoButton()
-      .kendoTabStrip()
-      .kendoProgressBar()
-      .kendoSlider()
-      .kendoColorPicker()
-      .kendoDropDownList();
+    this.kendoAutoComplete()
+      .kendoButton();
     return this;
   }
 
@@ -25,7 +21,6 @@ export class KendoConfigBuilder {
   pro(): KendoConfigBuilder {
     this.core()
       .kendoGrid()
-			.kendoAutoComplete()
       .kendoChart();
     return this;
   }

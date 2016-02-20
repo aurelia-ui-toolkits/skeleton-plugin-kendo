@@ -1,4 +1,4 @@
-define(['exports', 'aurelia-framework', '../common/widget-base', '../common/decorators', '../common/events', 'kendo-ui/js/kendo.autocomplete.min', 'kendo-ui/js/kendo.virtuallist.min'], function (exports, _aureliaFramework, _commonWidgetBase, _commonDecorators, _commonEvents, _kendoUiJsKendoAutocompleteMin, _kendoUiJsKendoVirtuallistMin) {
+define(['exports', 'aurelia-dependency-injection', 'aurelia-templating', '../common/widget-base', '../common/decorators', '../common/constants', 'kendo.autocomplete.min', 'kendo.virtuallist.min'], function (exports, _aureliaDependencyInjection, _aureliaTemplating, _commonWidgetBase, _commonDecorators, _commonConstants, _kendoAutocompleteMin, _kendoVirtuallistMin) {
   'use strict';
 
   exports.__esModule = true;
@@ -7,152 +7,56 @@ define(['exports', 'aurelia-framework', '../common/widget-base', '../common/deco
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
-  function _inherits(subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
   function _defineDecoratedPropertyDescriptor(target, key, descriptors) { var _descriptor = descriptors[key]; if (!_descriptor) return; var descriptor = {}; for (var _key in _descriptor) descriptor[_key] = _descriptor[_key]; descriptor.value = descriptor.initializer ? descriptor.initializer.call(target) : undefined; Object.defineProperty(target, key, descriptor); }
 
-  var AutoComplete = (function (_WidgetBase) {
+  var AutoComplete = (function () {
     var _instanceInitializers = {};
 
-    _inherits(AutoComplete, _WidgetBase);
-
     _createDecoratedClass(AutoComplete, [{
-      key: 'kDataSource',
-      decorators: [_aureliaFramework.bindable],
-      initializer: null,
-      enumerable: true
-    }, {
       key: 'options',
-      decorators: [_aureliaFramework.bindable],
+      decorators: [_aureliaTemplating.bindable],
       initializer: function initializer() {
         return {};
       },
       enumerable: true
     }], null, _instanceInitializers);
 
-    function AutoComplete(element) {
+    function AutoComplete(element, widgetBase) {
       _classCallCheck(this, _AutoComplete);
 
-      _WidgetBase.call(this, 'kendoAutoComplete', element);
-
-      _defineDecoratedPropertyDescriptor(this, 'kDataSource', _instanceInitializers);
-
       _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers);
+
+      this.element = element;
+      this.widgetBase = widgetBase.control('kendoAutoComplete').linkViewModel(this).useValueBinding();
     }
 
     AutoComplete.prototype.bind = function bind(ctx) {
-      _WidgetBase.prototype.bind.call(this, ctx);
+      this.$parent = ctx;
 
-      this._initialize();
+      this.recreate();
     };
 
-    AutoComplete.prototype._initialize = function _initialize() {
-      var _this = this;
-
-      _WidgetBase.prototype._initialize.call(this);
-
-      this.widget.bind('change', function (event) {
-        _this.kValue = event.sender.value();
-
-        _commonEvents.fireEvent(_this.element, 'input');
-      });
-
-      this.widget.bind('select', function (event) {
-        _this.kValue = event.sender.value();
-
-        _commonEvents.fireEvent(_this.element, 'input');
+    AutoComplete.prototype.recreate = function recreate() {
+      this.kWidget = this.widgetBase.createWidget({
+        element: this.element,
+        parentCtx: this.$parent
       });
     };
 
-    AutoComplete.prototype.kEnableChanged = function kEnableChanged() {
-      if (this.widget) {
-        this.widget.enable(this.kEnable);
-      }
+    AutoComplete.prototype.propertyChanged = function propertyChanged(property, newValue, oldValue) {
+      this.widgetBase.handlePropertyChanged(this.kWidget, property, newValue, oldValue);
     };
 
-    AutoComplete.prototype.enable = function enable(newValue) {
-      if (this.widget) {
-        return this.widget.enable(newValue);
-      }
-    };
-
-    AutoComplete.prototype.value = function value(newValue) {
-      if (this.widget) {
-        if (newValue) {
-          this.widget.value(newValue);
-          this.widget.trigger('change');
-        } else {
-          return this.widget.value();
-        }
-      }
-    };
-
-    AutoComplete.prototype.search = function search(value) {
-      if (this.widget) {
-        this.widget.search(value);
-      }
-    };
-
-    AutoComplete.prototype.close = function close(value) {
-      if (this.widget) {
-        return this.widget.close(value);
-      }
-    };
-
-    AutoComplete.prototype.dataItem = function dataItem(value) {
-      if (this.widget) {
-        return this.widget.dataItem(value);
-      }
-    };
-
-    AutoComplete.prototype.destroy = function destroy() {
-      if (this.widget) {
-        return this.widget.destroy();
-      }
-    };
-
-    AutoComplete.prototype.focus = function focus() {
-      if (this.widget) {
-        return this.widget.focus();
-      }
-    };
-
-    AutoComplete.prototype.readonly = function readonly(value) {
-      if (this.widget) {
-        return this.widget.readonly(value);
-      }
-    };
-
-    AutoComplete.prototype.refresh = function refresh() {
-      if (this.widget) {
-        return this.widget.refresh();
-      }
-    };
-
-    AutoComplete.prototype.select = function select(value) {
-      if (this.widget) {
-        return this.widget.select(value);
-      }
-    };
-
-    AutoComplete.prototype.setDataSource = function setDataSource(value) {
-      if (this.widget) {
-        return this.widget.setDataSource(value);
-      }
-    };
-
-    AutoComplete.prototype.suggest = function suggest(value) {
-      if (this.widget) {
-        return this.widget.suggest(value);
-      }
+    AutoComplete.prototype.detached = function detached() {
+      this.widgetBase.destroy(this.kWidget);
     };
 
     var _AutoComplete = AutoComplete;
+    AutoComplete = _aureliaDependencyInjection.inject(Element, _commonWidgetBase.WidgetBase)(AutoComplete) || AutoComplete;
     AutoComplete = _commonDecorators.generateBindables('kendoAutoComplete')(AutoComplete) || AutoComplete;
-    AutoComplete = _aureliaFramework.inject(Element)(AutoComplete) || AutoComplete;
-    AutoComplete = _aureliaFramework.customAttribute('k-autocomplete')(AutoComplete) || AutoComplete;
+    AutoComplete = _aureliaTemplating.customAttribute(_commonConstants.constants.attributePrefix + 'autocomplete')(AutoComplete) || AutoComplete;
     return AutoComplete;
-  })(_commonWidgetBase.WidgetBase);
+  })();
 
   exports.AutoComplete = AutoComplete;
 });
