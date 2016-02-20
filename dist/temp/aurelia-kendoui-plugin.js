@@ -980,6 +980,53 @@ var Col = (function () {
 
 exports.Col = Col;
 
+var TabStrip = (function () {
+  var _instanceInitializers7 = {};
+
+  _createDecoratedClass(TabStrip, [{
+    key: 'options',
+    decorators: [_aureliaTemplating.bindable],
+    initializer: function initializer() {
+      return {};
+    },
+    enumerable: true
+  }], null, _instanceInitializers7);
+
+  function TabStrip(element, widgetBase) {
+    _classCallCheck(this, _TabStrip);
+
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers7);
+
+    this.element = element;
+    this.widgetBase = widgetBase.control('kendoTabStrip').linkViewModel(this);
+  }
+
+  TabStrip.prototype.bind = function bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  };
+
+  TabStrip.prototype.recreate = function recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  };
+
+  TabStrip.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
+  };
+
+  var _TabStrip = TabStrip;
+  TabStrip = _aureliaDependencyInjection.inject(Element, WidgetBase)(TabStrip) || TabStrip;
+  TabStrip = generateBindables('kendoTabStrip')(TabStrip) || TabStrip;
+  TabStrip = _aureliaTemplating.customAttribute(constants.attributePrefix + 'tabstrip')(TabStrip) || TabStrip;
+  return TabStrip;
+})();
+
+exports.TabStrip = TabStrip;
+
 var kendoToStringValueConverter = (function () {
   function kendoToStringValueConverter() {
     _classCallCheck(this, kendoToStringValueConverter);
@@ -1083,50 +1130,3 @@ var kendoFormatValueConverter = (function () {
 })();
 
 exports.kendoFormatValueConverter = kendoFormatValueConverter;
-
-var TabStrip = (function () {
-  var _instanceInitializers7 = {};
-
-  _createDecoratedClass(TabStrip, [{
-    key: 'options',
-    decorators: [_aureliaTemplating.bindable],
-    initializer: function initializer() {
-      return {};
-    },
-    enumerable: true
-  }], null, _instanceInitializers7);
-
-  function TabStrip(element, widgetBase) {
-    _classCallCheck(this, _TabStrip);
-
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers7);
-
-    this.element = element;
-    this.widgetBase = widgetBase.control('kendoTabStrip').linkViewModel(this);
-  }
-
-  TabStrip.prototype.bind = function bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  };
-
-  TabStrip.prototype.recreate = function recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  };
-
-  TabStrip.prototype.detached = function detached() {
-    this.widgetBase.destroy(this.kWidget);
-  };
-
-  var _TabStrip = TabStrip;
-  TabStrip = _aureliaDependencyInjection.inject(Element, WidgetBase)(TabStrip) || TabStrip;
-  TabStrip = generateBindables('kendoTabStrip')(TabStrip) || TabStrip;
-  TabStrip = _aureliaTemplating.customAttribute(constants.attributePrefix + 'tabstrip')(TabStrip) || TabStrip;
-  return TabStrip;
-})();
-
-exports.TabStrip = TabStrip;

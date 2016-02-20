@@ -327,6 +327,13 @@ declare module 'aurelia-kendoui-plugin' {
     templates: any;
     bind(): any;
   }
+  export class TabStrip {
+    options: any;
+    constructor(element: any, widgetBase: any);
+    bind(ctx: any): any;
+    recreate(): any;
+    detached(): any;
+  }
   export class kendoToStringValueConverter {
     toView(value: any, format: any, language: any): any;
   }
@@ -347,12 +354,5 @@ declare module 'aurelia-kendoui-plugin' {
   }
   export class kendoFormatValueConverter {
     toView(value: any, ...params: any[]): any;
-  }
-  export class TabStrip {
-    options: any;
-    constructor(element: any, widgetBase: any);
-    bind(ctx: any): any;
-    recreate(): any;
-    detached(): any;
   }
 }
