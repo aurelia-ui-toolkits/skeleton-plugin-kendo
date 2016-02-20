@@ -332,4 +332,25 @@ declare module 'aurelia-kendoui-plugin' {
     recreate(): any;
     detached(): any;
   }
+  export class kendoToStringValueConverter {
+    toView(value: any, format: any, language: any): any;
+  }
+  export class kendoParseDateValueConverter {
+    toView(value: any, format: any, language: any): any;
+  }
+  export class kendoParseIntValueConverter {
+    toView(value: any, language: any): any;
+  }
+  export class kendoParseFloatValueConverter {
+    toView(value: any, language: any): any;
+  }
+  export class kendoParseColorValueConverter {
+    toView(value: any): any;
+  }
+  export class kendoStringifyValueConverter {
+    toView(obj: any): any;
+  }
+  export class kendoFormatValueConverter {
+    toView(value: any, ...params: any[]): any;
+  }
 }
