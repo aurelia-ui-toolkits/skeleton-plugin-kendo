@@ -173,8 +173,8 @@ export class Button {
   }
 }
 
-//eslint-disable-line no-unused-vars
-@customElement(`${constants.elementPrefix}chart`)
+// //eslint-disable-line no-unused-vars
+// // // @customElement(`${constants.elementPrefix}chart`)
 @generateBindables('kendoChart')
 @inject(Element, WidgetBase)
 export class Chart {

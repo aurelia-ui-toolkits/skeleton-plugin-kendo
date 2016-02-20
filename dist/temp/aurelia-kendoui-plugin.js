@@ -278,7 +278,6 @@ var Chart = (function () {
   var _Chart = Chart;
   Chart = _aureliaDependencyInjection.inject(Element, WidgetBase)(Chart) || Chart;
   Chart = generateBindables('kendoChart')(Chart) || Chart;
-  Chart = _aureliaTemplating.customElement(constants.elementPrefix + 'chart')(Chart) || Chart;
   return Chart;
 })();
 

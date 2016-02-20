@@ -63,7 +63,8 @@ declare module 'aurelia-kendoui-plugin' {
     detached(): any;
   }
   
-  // eslint-disable-line no-unused-vars
+  //  //eslint-disable-line no-unused-vars
+  //  // // @customElement(`${constants.elementPrefix}chart`)
   export class Chart {
     options: any;
     constructor(element: any, widgetBase: any);

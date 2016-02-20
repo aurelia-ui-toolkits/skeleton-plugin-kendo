@@ -18,14 +18,6 @@ var _commonDecorators = require('../common/decorators');
 
 var _commonConstants = require('../common/constants');
 
-var _pdfPdf = require('../pdf/pdf');
-
-require('kendo.dataviz.chart.min');
-
-require('kendo.dataviz.chart.polar.min');
-
-require('kendo.dataviz.chart.funnel.min');
-
 var Chart = (function () {
   var _instanceInitializers = {};
 
