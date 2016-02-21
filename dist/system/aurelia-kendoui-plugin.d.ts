@@ -36,6 +36,16 @@ declare module 'aurelia-kendoui-plugin' {
       * Allows you to import wrappers yourself via <require></require>
       */
     withoutGlobalResources(): KendoConfigBuilder;
+    
+    /**
+      * Registers value converters (wrappers around kendo functions)
+      */
+    useValueConverters(): KendoConfigBuilder;
+    
+    /**
+      * Adds kendo templating support
+      */
+    kendoTemplateSupport(): KendoConfigBuilder;
     kendoAutoComplete(): KendoConfigBuilder;
     kendoButton(): KendoConfigBuilder;
     kendoGrid(): KendoConfigBuilder;

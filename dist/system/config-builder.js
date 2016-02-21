@@ -31,6 +31,16 @@ System.register([], function (_export) {
           return this;
         };
 
+        KendoConfigBuilder.prototype.useValueConverters = function useValueConverters() {
+          this.resources.push('valueconverters/valueconverters');
+          return this;
+        };
+
+        KendoConfigBuilder.prototype.kendoTemplateSupport = function kendoTemplateSupport() {
+          this.resources.push('common/k-template');
+          return this;
+        };
+
         KendoConfigBuilder.prototype.kendoAutoComplete = function kendoAutoComplete() {
           this.resources.push('autocomplete/autocomplete');
           return this;

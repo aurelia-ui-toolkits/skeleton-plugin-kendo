@@ -35,6 +35,22 @@ export class KendoConfigBuilder {
     return this;
   }
 
+    /**
+  * Registers value converters (wrappers around kendo functions)
+  */
+  useValueConverters(): KendoConfigBuilder {
+    this.resources.push('valueconverters/valueconverters');
+    return this;
+  }
+
+  /**
+  * Adds kendo templating support
+  */
+  kendoTemplateSupport(): KendoConfigBuilder {
+    this.resources.push('common/k-template');
+    return this;
+  }
+
   kendoAutoComplete(): KendoConfigBuilder {
     this.resources.push('autocomplete/autocomplete');
     return this;
