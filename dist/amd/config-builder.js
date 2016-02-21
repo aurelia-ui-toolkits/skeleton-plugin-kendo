@@ -14,7 +14,7 @@ define(['exports'], function (exports) {
     }
 
     KendoConfigBuilder.prototype.core = function core() {
-      this.kendoAutoComplete().kendoButton().kendoTabStrip();
+      this.kendoAutoComplete().kendoButton().kendoTemplateSupport().kendoTabStrip();
       return this;
     };
 

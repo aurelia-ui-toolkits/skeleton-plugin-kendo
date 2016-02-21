@@ -77,5 +77,4 @@ export class KendoConfigBuilder {
     this.resources.push('tabstrip/tabstrip');
     return this;
   }
-
 }

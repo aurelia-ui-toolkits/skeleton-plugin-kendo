@@ -3,8 +3,8 @@ declare module 'aurelia-kendoui-plugin' {
   import 'jquery';
   import 'kendo.autocomplete.min';
   import 'kendo.virtuallist.min';
-  import 'kendo.button.min';
   import 'kendo.dataviz.chart.min';
+  import 'kendo.button.min';
   import 'kendo.grid.min';
   import 'kendo.tabstrip.min';
   import { Aurelia }  from 'aurelia-framework';
@@ -61,18 +61,18 @@ declare module 'aurelia-kendoui-plugin' {
     propertyChanged(property: any, newValue: any, oldValue: any): any;
     detached(): any;
   }
-  export class Button {
-    options: any;
-    constructor(element: any, widgetBase: any);
-    bind(ctx: any): any;
-    recreate(): any;
-    detached(): any;
-  }
   export class Chart {
     options: any;
     constructor(element: any, widgetBase: any);
     bind(ctx: any): any;
     attached(): any;
+    recreate(): any;
+    detached(): any;
+  }
+  export class Button {
+    options: any;
+    constructor(element: any, widgetBase: any);
+    bind(ctx: any): any;
     recreate(): any;
     detached(): any;
   }

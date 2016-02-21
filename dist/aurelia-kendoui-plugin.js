@@ -2,8 +2,8 @@ import * as LogManager from 'aurelia-logging';
 import 'jquery';
 import 'kendo.autocomplete.min';
 import 'kendo.virtuallist.min';
-import 'kendo.button.min';
 import 'kendo.dataviz.chart.min';
+import 'kendo.button.min';
 import 'kendo.grid.min';
 import 'kendo.tabstrip.min';
 import {Aurelia} from 'aurelia-framework';
@@ -27,6 +27,7 @@ export class KendoConfigBuilder {
   core(): KendoConfigBuilder {
     this.kendoAutoComplete()
       .kendoButton()
+      .kendoTemplateSupport()
       .kendoTabStrip();
     return this;
   }
@@ -91,7 +92,6 @@ export class KendoConfigBuilder {
     this.resources.push('tabstrip/tabstrip');
     return this;
   }
-
 }
 
 let logger = LogManager.getLogger('aurelia-kendoui-plugin');
@@ -153,38 +153,6 @@ export class AutoComplete {
   }
 }
 
-@customAttribute(`${constants.attributePrefix}button`)
-@generateBindables('kendoButton')
-@inject(Element, WidgetBase)
-export class Button {
-
-  @bindable options = {};
-
-  constructor(element, widgetBase) {
-    this.element = element;
-    this.widgetBase = widgetBase
-                        .control('kendoButton')
-                        .linkViewModel(this);
-  }
-
-  bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  }
-
-  recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  }
-
-  detached() {
-    this.widgetBase.destroy(this.kWidget);
-  }
-}
-
 @customElement(`${constants.elementPrefix}chart`)
 @generateBindables('kendoChart')
 @inject(Element, WidgetBase)
@@ -204,6 +172,38 @@ export class Chart {
   }
 
   attached() {
+    this.recreate();
+  }
+
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  }
+
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
+  }
+}
+
+@customAttribute(`${constants.attributePrefix}button`)
+@generateBindables('kendoButton')
+@inject(Element, WidgetBase)
+export class Button {
+
+  @bindable options = {};
+
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoButton')
+                        .linkViewModel(this);
+  }
+
+  bind(ctx) {
+    this.$parent = ctx;
+
     this.recreate();
   }
 

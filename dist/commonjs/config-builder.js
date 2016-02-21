@@ -13,7 +13,7 @@ var KendoConfigBuilder = (function () {
   }
 
   KendoConfigBuilder.prototype.core = function core() {
-    this.kendoAutoComplete().kendoButton().kendoTabStrip();
+    this.kendoAutoComplete().kendoButton().kendoTemplateSupport().kendoTabStrip();
     return this;
   };
 
