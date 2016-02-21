@@ -12,6 +12,7 @@ export class KendoConfigBuilder {
   core(): KendoConfigBuilder {
     this.kendoAutoComplete()
       .kendoButton()
+      .kendoTemplateSupport()
       .kendoTabStrip();
     return this;
   }
