@@ -1,4 +1,4 @@
-System.register(['aurelia-dependency-injection', 'aurelia-templating', '../common/widget-base', '../common/decorators', '../common/constants'], function (_export) {
+System.register(['aurelia-dependency-injection', 'aurelia-templating', '../common/widget-base', '../common/decorators', '../common/constants', 'kendo.dataviz.chart.min'], function (_export) {
   'use strict';
 
   var inject, customElement, bindable, WidgetBase, generateBindables, constants, Chart;
@@ -21,7 +21,7 @@ System.register(['aurelia-dependency-injection', 'aurelia-templating', '../commo
       generateBindables = _commonDecorators.generateBindables;
     }, function (_commonConstants) {
       constants = _commonConstants.constants;
-    }],
+    }, function (_kendoDatavizChartMin) {}],
     execute: function () {
       Chart = (function () {
         var _instanceInitializers = {};

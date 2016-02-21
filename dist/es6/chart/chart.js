@@ -4,6 +4,8 @@ import {WidgetBase} from '../common/widget-base';
 import {generateBindables} from '../common/decorators';
 import {constants} from '../common/constants';
 
+import 'kendo.dataviz.chart.min';
+
 @customElement(`${constants.elementPrefix}chart`)
 @generateBindables('kendoChart')
 @inject(Element, WidgetBase)

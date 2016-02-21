@@ -18,6 +18,8 @@ var _commonDecorators = require('../common/decorators');
 
 var _commonConstants = require('../common/constants');
 
+require('kendo.dataviz.chart.min');
+
 var Chart = (function () {
   var _instanceInitializers = {};
 
