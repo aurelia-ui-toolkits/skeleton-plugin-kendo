@@ -34,9 +34,9 @@ require('kendo.autocomplete.min');
 
 require('kendo.virtuallist.min');
 
-require('kendo.dataviz.chart.min');
-
 require('kendo.button.min');
+
+require('kendo.dataviz.chart.min');
 
 require('kendo.grid.min');
 
@@ -63,7 +63,7 @@ var KendoConfigBuilder = (function () {
   }
 
   KendoConfigBuilder.prototype.core = function core() {
-    this.kendoAutoComplete().kendoButton().kendoTemplateSupport().kendoTabStrip();
+    this.kendoAutoComplete().kendoButton().kendoTemplateSupport();
     return this;
   };
 
@@ -105,11 +105,6 @@ var KendoConfigBuilder = (function () {
 
   KendoConfigBuilder.prototype.kendoChart = function kendoChart() {
     this.resources.push('chart/chart');
-    return this;
-  };
-
-  KendoConfigBuilder.prototype.kendoTabStrip = function kendoTabStrip() {
-    this.resources.push('tabstrip/tabstrip');
     return this;
   };
 
@@ -190,57 +185,8 @@ var AutoComplete = (function () {
 
 exports.AutoComplete = AutoComplete;
 
-var Chart = (function () {
-  var _instanceInitializers2 = {};
-
-  _createDecoratedClass(Chart, [{
-    key: 'options',
-    decorators: [_aureliaTemplating.bindable],
-    initializer: function initializer() {
-      return {};
-    },
-    enumerable: true
-  }], null, _instanceInitializers2);
-
-  function Chart(element, widgetBase) {
-    _classCallCheck(this, _Chart);
-
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers2);
-
-    this.element = element;
-    this.widgetBase = widgetBase.control('kendoChart').linkViewModel(this);
-  }
-
-  Chart.prototype.bind = function bind(ctx) {
-    this.$parent = ctx;
-  };
-
-  Chart.prototype.attached = function attached() {
-    this.recreate();
-  };
-
-  Chart.prototype.recreate = function recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  };
-
-  Chart.prototype.detached = function detached() {
-    this.widgetBase.destroy(this.kWidget);
-  };
-
-  var _Chart = Chart;
-  Chart = _aureliaDependencyInjection.inject(Element, WidgetBase)(Chart) || Chart;
-  Chart = generateBindables('kendoChart')(Chart) || Chart;
-  Chart = _aureliaTemplating.customElement(constants.elementPrefix + 'chart')(Chart) || Chart;
-  return Chart;
-})();
-
-exports.Chart = Chart;
-
 var Button = (function () {
-  var _instanceInitializers3 = {};
+  var _instanceInitializers2 = {};
 
   _createDecoratedClass(Button, [{
     key: 'options',
@@ -249,12 +195,12 @@ var Button = (function () {
       return {};
     },
     enumerable: true
-  }], null, _instanceInitializers3);
+  }], null, _instanceInitializers2);
 
   function Button(element, widgetBase) {
     _classCallCheck(this, _Button);
 
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers3);
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers2);
 
     this.element = element;
     this.widgetBase = widgetBase.control('kendoButton').linkViewModel(this);
@@ -386,7 +332,7 @@ function generateBindables(controlName) {
 }
 
 var Template = (function () {
-  var _instanceInitializers4 = {};
+  var _instanceInitializers3 = {};
 
   _createDecoratedClass(Template, [{
     key: 'template',
@@ -400,14 +346,14 @@ var Template = (function () {
       return 'template';
     },
     enumerable: true
-  }], null, _instanceInitializers4);
+  }], null, _instanceInitializers3);
 
   function Template(targetInstruction) {
     _classCallCheck(this, _Template);
 
-    _defineDecoratedPropertyDescriptor(this, 'template', _instanceInitializers4);
+    _defineDecoratedPropertyDescriptor(this, 'template', _instanceInitializers3);
 
-    _defineDecoratedPropertyDescriptor(this, 'for', _instanceInitializers4);
+    _defineDecoratedPropertyDescriptor(this, 'for', _instanceInitializers3);
 
     this.template = targetInstruction.elementInstruction.template;
   }
@@ -876,6 +822,55 @@ var WidgetBase = (function () {
 
 exports.WidgetBase = WidgetBase;
 
+var Chart = (function () {
+  var _instanceInitializers4 = {};
+
+  _createDecoratedClass(Chart, [{
+    key: 'options',
+    decorators: [_aureliaTemplating.bindable],
+    initializer: function initializer() {
+      return {};
+    },
+    enumerable: true
+  }], null, _instanceInitializers4);
+
+  function Chart(element, widgetBase) {
+    _classCallCheck(this, _Chart);
+
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers4);
+
+    this.element = element;
+    this.widgetBase = widgetBase.control('kendoChart').linkViewModel(this);
+  }
+
+  Chart.prototype.bind = function bind(ctx) {
+    this.$parent = ctx;
+  };
+
+  Chart.prototype.attached = function attached() {
+    this.recreate();
+  };
+
+  Chart.prototype.recreate = function recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  };
+
+  Chart.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
+  };
+
+  var _Chart = Chart;
+  Chart = _aureliaDependencyInjection.inject(Element, WidgetBase)(Chart) || Chart;
+  Chart = generateBindables('kendoChart')(Chart) || Chart;
+  Chart = _aureliaTemplating.customElement(constants.elementPrefix + 'chart')(Chart) || Chart;
+  return Chart;
+})();
+
+exports.Chart = Chart;
+
 var Grid = (function () {
   var _instanceInitializers5 = {};
 
@@ -984,53 +979,6 @@ var Col = (function () {
 
 exports.Col = Col;
 
-var TabStrip = (function () {
-  var _instanceInitializers7 = {};
-
-  _createDecoratedClass(TabStrip, [{
-    key: 'options',
-    decorators: [_aureliaTemplating.bindable],
-    initializer: function initializer() {
-      return {};
-    },
-    enumerable: true
-  }], null, _instanceInitializers7);
-
-  function TabStrip(element, widgetBase) {
-    _classCallCheck(this, _TabStrip);
-
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers7);
-
-    this.element = element;
-    this.widgetBase = widgetBase.control('kendoTabStrip').linkViewModel(this);
-  }
-
-  TabStrip.prototype.bind = function bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  };
-
-  TabStrip.prototype.recreate = function recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  };
-
-  TabStrip.prototype.detached = function detached() {
-    this.widgetBase.destroy(this.kWidget);
-  };
-
-  var _TabStrip = TabStrip;
-  TabStrip = _aureliaDependencyInjection.inject(Element, WidgetBase)(TabStrip) || TabStrip;
-  TabStrip = generateBindables('kendoTabStrip')(TabStrip) || TabStrip;
-  TabStrip = _aureliaTemplating.customAttribute(constants.attributePrefix + 'tabstrip')(TabStrip) || TabStrip;
-  return TabStrip;
-})();
-
-exports.TabStrip = TabStrip;
-
 var kendoToStringValueConverter = (function () {
   function kendoToStringValueConverter() {
     _classCallCheck(this, kendoToStringValueConverter);
@@ -1134,3 +1082,50 @@ var kendoFormatValueConverter = (function () {
 })();
 
 exports.kendoFormatValueConverter = kendoFormatValueConverter;
+
+var TabStrip = (function () {
+  var _instanceInitializers7 = {};
+
+  _createDecoratedClass(TabStrip, [{
+    key: 'options',
+    decorators: [_aureliaTemplating.bindable],
+    initializer: function initializer() {
+      return {};
+    },
+    enumerable: true
+  }], null, _instanceInitializers7);
+
+  function TabStrip(element, widgetBase) {
+    _classCallCheck(this, _TabStrip);
+
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers7);
+
+    this.element = element;
+    this.widgetBase = widgetBase.control('kendoTabStrip').linkViewModel(this);
+  }
+
+  TabStrip.prototype.bind = function bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  };
+
+  TabStrip.prototype.recreate = function recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  };
+
+  TabStrip.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
+  };
+
+  var _TabStrip = TabStrip;
+  TabStrip = _aureliaDependencyInjection.inject(Element, WidgetBase)(TabStrip) || TabStrip;
+  TabStrip = generateBindables('kendoTabStrip')(TabStrip) || TabStrip;
+  TabStrip = _aureliaTemplating.customAttribute(constants.attributePrefix + 'tabstrip')(TabStrip) || TabStrip;
+  return TabStrip;
+})();
+
+exports.TabStrip = TabStrip;

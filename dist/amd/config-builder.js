@@ -14,7 +14,7 @@ define(['exports'], function (exports) {
     }
 
     KendoConfigBuilder.prototype.core = function core() {
-      this.kendoAutoComplete().kendoButton().kendoTemplateSupport().kendoTabStrip();
+      this.kendoAutoComplete().kendoButton().kendoTemplateSupport();
       return this;
     };
 
@@ -56,11 +56,6 @@ define(['exports'], function (exports) {
 
     KendoConfigBuilder.prototype.kendoChart = function kendoChart() {
       this.resources.push('chart/chart');
-      return this;
-    };
-
-    KendoConfigBuilder.prototype.kendoTabStrip = function kendoTabStrip() {
-      this.resources.push('tabstrip/tabstrip');
       return this;
     };
 
