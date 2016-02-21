@@ -7,7 +7,7 @@ import 'kendo.grid.min';
 import 'kendo.tabstrip.min';
 import {Aurelia} from 'aurelia-framework';
 import {inject,Container,transient} from 'aurelia-dependency-injection';
-import {customAttribute,bindable,customElement,BindableProperty,HtmlBehaviorResource,noView,processContent,TargetInstruction,TemplatingEngine,children,ViewResources} from 'aurelia-templating';
+import {customAttribute,bindable,BindableProperty,HtmlBehaviorResource,customElement,noView,processContent,TargetInstruction,TemplatingEngine,children,ViewResources} from 'aurelia-templating';
 import {metadata} from 'aurelia-metadata';
 import {bindingMode} from 'aurelia-binding';
 import {TaskQueue} from 'aurelia-task-queue';
@@ -153,40 +153,6 @@ export class Button {
   bind(ctx) {
     this.$parent = ctx;
 
-    this.recreate();
-  }
-
-  recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  }
-
-  detached() {
-    this.widgetBase.destroy(this.kWidget);
-  }
-}
-
-@customElement(`${constants.elementPrefix}chart`)
-@generateBindables('kendoChart')
-@inject(Element, WidgetBase)
-export class Chart {
-
-  @bindable options = {};
-
-  constructor(element, widgetBase) {
-    this.element = element;
-    this.widgetBase = widgetBase
-                        .control('kendoChart')
-                        .linkViewModel(this);
-  }
-
-  bind(ctx) {
-    this.$parent = ctx;
-  }
-
-  attached() {
     this.recreate();
   }
 
@@ -883,6 +849,40 @@ export class WidgetBase {
   }
 }
 
+@customElement(`${constants.elementPrefix}chart`)
+@generateBindables('kendoChart')
+@inject(Element, WidgetBase)
+export class Chart {
+
+  @bindable options = {};
+
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoChart')
+                        .linkViewModel(this);
+  }
+
+  bind(ctx) {
+    this.$parent = ctx;
+  }
+
+  attached() {
+    this.recreate();
+  }
+
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  }
+
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
+  }
+}
+
 @customElement(`${constants.elementPrefix}grid`)
 @generateBindables('kendoGrid')
 @inject(Element, WidgetBase, ViewResources, OptionsBuilder)
@@ -955,38 +955,6 @@ export class Col {
   }
 }
 
-@customAttribute(`${constants.attributePrefix}tabstrip`)
-@generateBindables('kendoTabStrip')
-@inject(Element, WidgetBase)
-export class TabStrip {
-
-  @bindable options = {};
-
-  constructor(element, widgetBase) {
-    this.element = element;
-    this.widgetBase = widgetBase
-                        .control('kendoTabStrip')
-                        .linkViewModel(this);
-  }
-
-  bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  }
-
-  recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  }
-
-  detached() {
-    this.widgetBase.destroy(this.kWidget);
-  }
-}
-
 export class kendoToStringValueConverter {
   toView(value, format, language) {
     return kendo.toString(value, format, language);
@@ -1028,5 +996,37 @@ export class kendoFormatValueConverter {
     params.unshift(value);
 
     return kendo.format.apply(this, params);
+  }
+}
+
+@customAttribute(`${constants.attributePrefix}tabstrip`)
+@generateBindables('kendoTabStrip')
+@inject(Element, WidgetBase)
+export class TabStrip {
+
+  @bindable options = {};
+
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoTabStrip')
+                        .linkViewModel(this);
+  }
+
+  bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  }
+
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  }
+
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
   }
 }

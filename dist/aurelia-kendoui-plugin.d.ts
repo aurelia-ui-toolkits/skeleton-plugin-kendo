@@ -8,7 +8,7 @@ declare module 'aurelia-kendoui-plugin' {
   import 'kendo.tabstrip.min';
   import { Aurelia }  from 'aurelia-framework';
   import { inject, Container, transient }  from 'aurelia-dependency-injection';
-  import { customAttribute, bindable, customElement, BindableProperty, HtmlBehaviorResource, noView, processContent, TargetInstruction, TemplatingEngine, children, ViewResources }  from 'aurelia-templating';
+  import { customAttribute, bindable, BindableProperty, HtmlBehaviorResource, customElement, noView, processContent, TargetInstruction, TemplatingEngine, children, ViewResources }  from 'aurelia-templating';
   import { metadata }  from 'aurelia-metadata';
   import { bindingMode }  from 'aurelia-binding';
   import { TaskQueue }  from 'aurelia-task-queue';
@@ -54,14 +54,6 @@ declare module 'aurelia-kendoui-plugin' {
     options: any;
     constructor(element: any, widgetBase: any);
     bind(ctx: any): any;
-    recreate(): any;
-    detached(): any;
-  }
-  export class Chart {
-    options: any;
-    constructor(element: any, widgetBase: any);
-    bind(ctx: any): any;
-    attached(): any;
     recreate(): any;
     detached(): any;
   }
@@ -300,6 +292,14 @@ declare module 'aurelia-kendoui-plugin' {
       */
     destroy(widget: any): any;
   }
+  export class Chart {
+    options: any;
+    constructor(element: any, widgetBase: any);
+    bind(ctx: any): any;
+    attached(): any;
+    recreate(): any;
+    detached(): any;
+  }
   export class Grid {
     columns: any;
     options: any;
@@ -315,13 +315,6 @@ declare module 'aurelia-kendoui-plugin' {
   export class Col {
     templates: any;
     bind(): any;
-  }
-  export class TabStrip {
-    options: any;
-    constructor(element: any, widgetBase: any);
-    bind(ctx: any): any;
-    recreate(): any;
-    detached(): any;
   }
   export class kendoToStringValueConverter {
     toView(value: any, format: any, language: any): any;
@@ -343,5 +336,12 @@ declare module 'aurelia-kendoui-plugin' {
   }
   export class kendoFormatValueConverter {
     toView(value: any, ...params: any[]): any;
+  }
+  export class TabStrip {
+    options: any;
+    constructor(element: any, widgetBase: any);
+    bind(ctx: any): any;
+    recreate(): any;
+    detached(): any;
   }
 }
