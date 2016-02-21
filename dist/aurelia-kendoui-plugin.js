@@ -3,11 +3,6 @@ import 'jquery';
 import 'kendo.autocomplete.min';
 import 'kendo.virtuallist.min';
 import 'kendo.button.min';
-import 'kendo.dataviz.chart.min';
-import 'kendo.dataviz.chart.polar.min';
-import 'kendo.dataviz.chart.funnel.min';
-import 'kendo.data.signalr.min';
-import 'kendo.filtercell.min';
 import 'kendo.grid.min';
 import 'kendo.tabstrip.min';
 import {Aurelia} from 'aurelia-framework';
@@ -173,8 +168,7 @@ export class Button {
   }
 }
 
-// //eslint-disable-line no-unused-vars
-// // // @customElement(`${constants.elementPrefix}chart`)
+@customElement(`${constants.elementPrefix}chart`)
 @generateBindables('kendoChart')
 @inject(Element, WidgetBase)
 export class Chart {
@@ -889,8 +883,7 @@ export class WidgetBase {
   }
 }
 
-// //eslint-disable-line no-unused-vars
-// // @customElement(`${constants.elementPrefix}grid`)
+@customElement(`${constants.elementPrefix}grid`)
 @generateBindables('kendoGrid')
 @inject(Element, WidgetBase, ViewResources, OptionsBuilder)
 export class Grid  {

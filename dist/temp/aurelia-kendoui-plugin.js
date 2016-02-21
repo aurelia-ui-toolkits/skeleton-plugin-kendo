@@ -36,16 +36,6 @@ require('kendo.virtuallist.min');
 
 require('kendo.button.min');
 
-require('kendo.dataviz.chart.min');
-
-require('kendo.dataviz.chart.polar.min');
-
-require('kendo.dataviz.chart.funnel.min');
-
-require('kendo.data.signalr.min');
-
-require('kendo.filtercell.min');
-
 require('kendo.grid.min');
 
 require('kendo.tabstrip.min');
@@ -278,6 +268,7 @@ var Chart = (function () {
   var _Chart = Chart;
   Chart = _aureliaDependencyInjection.inject(Element, WidgetBase)(Chart) || Chart;
   Chart = generateBindables('kendoChart')(Chart) || Chart;
+  Chart = _aureliaTemplating.customElement(constants.elementPrefix + 'chart')(Chart) || Chart;
   return Chart;
 })();
 
@@ -943,6 +934,7 @@ var Grid = (function () {
   var _Grid = Grid;
   Grid = _aureliaDependencyInjection.inject(Element, WidgetBase, _aureliaTemplating.ViewResources, OptionsBuilder)(Grid) || Grid;
   Grid = generateBindables('kendoGrid')(Grid) || Grid;
+  Grid = _aureliaTemplating.customElement(constants.elementPrefix + 'grid')(Grid) || Grid;
   return Grid;
 })();
 

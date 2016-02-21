@@ -4,11 +4,6 @@ declare module 'aurelia-kendoui-plugin' {
   import 'kendo.autocomplete.min';
   import 'kendo.virtuallist.min';
   import 'kendo.button.min';
-  import 'kendo.dataviz.chart.min';
-  import 'kendo.dataviz.chart.polar.min';
-  import 'kendo.dataviz.chart.funnel.min';
-  import 'kendo.data.signalr.min';
-  import 'kendo.filtercell.min';
   import 'kendo.grid.min';
   import 'kendo.tabstrip.min';
   import { Aurelia }  from 'aurelia-framework';
@@ -62,9 +57,6 @@ declare module 'aurelia-kendoui-plugin' {
     recreate(): any;
     detached(): any;
   }
-  
-  //  //eslint-disable-line no-unused-vars
-  //  // // @customElement(`${constants.elementPrefix}chart`)
   export class Chart {
     options: any;
     constructor(element: any, widgetBase: any);
@@ -308,9 +300,6 @@ declare module 'aurelia-kendoui-plugin' {
       */
     destroy(widget: any): any;
   }
-  
-  //  //eslint-disable-line no-unused-vars
-  //  // @customElement(`${constants.elementPrefix}grid`)
   export class Grid {
     columns: any;
     options: any;
