@@ -1,9 +1,9 @@
 declare module 'aurelia-kendoui-plugin' {
   import * as LogManager from 'aurelia-logging';
   import 'jquery';
-  import 'kendo.button.min';
   import 'kendo.autocomplete.min';
   import 'kendo.virtuallist.min';
+  import 'kendo.button.min';
   import 'kendo.dataviz.chart.min';
   import 'kendo.grid.min';
   import { Aurelia }  from 'aurelia-framework';
@@ -53,19 +53,19 @@ declare module 'aurelia-kendoui-plugin' {
     kendoChart(): KendoConfigBuilder;
   }
   export function configure(aurelia: Aurelia, configCallback?: ((builder: KendoConfigBuilder) => void)): any;
-  export class Button {
-    options: any;
-    constructor(element: any, widgetBase: any);
-    bind(ctx: any): any;
-    recreate(): any;
-    detached(): any;
-  }
   export class AutoComplete {
     options: any;
     constructor(element: any, widgetBase: any);
     bind(ctx: any): any;
     recreate(): any;
     propertyChanged(property: any, newValue: any, oldValue: any): any;
+    detached(): any;
+  }
+  export class Button {
+    options: any;
+    constructor(element: any, widgetBase: any);
+    bind(ctx: any): any;
+    recreate(): any;
     detached(): any;
   }
   export class Chart {
@@ -326,26 +326,5 @@ declare module 'aurelia-kendoui-plugin' {
   export class Col {
     templates: any;
     bind(): any;
-  }
-  export class kendoToStringValueConverter {
-    toView(value: any, format: any, language: any): any;
-  }
-  export class kendoParseDateValueConverter {
-    toView(value: any, format: any, language: any): any;
-  }
-  export class kendoParseIntValueConverter {
-    toView(value: any, language: any): any;
-  }
-  export class kendoParseFloatValueConverter {
-    toView(value: any, language: any): any;
-  }
-  export class kendoParseColorValueConverter {
-    toView(value: any): any;
-  }
-  export class kendoStringifyValueConverter {
-    toView(obj: any): any;
-  }
-  export class kendoFormatValueConverter {
-    toView(value: any, ...params: any[]): any;
   }
 }

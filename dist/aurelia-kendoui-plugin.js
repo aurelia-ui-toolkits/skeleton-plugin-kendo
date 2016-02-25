@@ -1,8 +1,8 @@
 import * as LogManager from 'aurelia-logging';
 import 'jquery';
-import 'kendo.button.min';
 import 'kendo.autocomplete.min';
 import 'kendo.virtuallist.min';
+import 'kendo.button.min';
 import 'kendo.dataviz.chart.min';
 import 'kendo.grid.min';
 import {Aurelia} from 'aurelia-framework';
@@ -109,38 +109,6 @@ export function configure(aurelia: Aurelia, configCallback?: (builder: KendoConf
   }
 }
 
-@customAttribute(`${constants.attributePrefix}button`)
-@generateBindables('kendoButton')
-@inject(Element, WidgetBase)
-export class Button {
-
-  @bindable options = {};
-
-  constructor(element, widgetBase) {
-    this.element = element;
-    this.widgetBase = widgetBase
-                        .control('kendoButton')
-                        .linkViewModel(this);
-  }
-
-  bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  }
-
-  recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  }
-
-  detached() {
-    this.widgetBase.destroy(this.kWidget);
-  }
-}
-
 @customAttribute(`${constants.attributePrefix}autocomplete`)
 @generateBindables('kendoAutoComplete')
 @inject(Element, WidgetBase)
@@ -171,6 +139,38 @@ export class AutoComplete {
 
   propertyChanged(property, newValue, oldValue) {
     this.widgetBase.handlePropertyChanged(this.kWidget, property, newValue, oldValue);
+  }
+
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
+  }
+}
+
+@customAttribute(`${constants.attributePrefix}button`)
+@generateBindables('kendoButton')
+@inject(Element, WidgetBase)
+export class Button {
+
+  @bindable options = {};
+
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoButton')
+                        .linkViewModel(this);
+  }
+
+  bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  }
+
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
   }
 
   detached() {
@@ -962,49 +962,5 @@ export class Col {
 
   bind() {
     useTemplates(this, 'GridColumn', this.templates);
-  }
-}
-
-export class kendoToStringValueConverter {
-  toView(value, format, language) {
-    return kendo.toString(value, format, language);
-  }
-}
-
-export class kendoParseDateValueConverter {
-  toView(value, format, language) {
-    return kendo.parseDate(value, format, language);
-  }
-}
-
-export class kendoParseIntValueConverter {
-  toView(value, language) {
-    return kendo.parseInt(value, language);
-  }
-}
-
-export class kendoParseFloatValueConverter {
-  toView(value, language) {
-    return kendo.parseFloat(value, language);
-  }
-}
-
-export class kendoParseColorValueConverter {
-  toView(value) {
-    return kendo.parseColor(value);
-  }
-}
-
-export class kendoStringifyValueConverter {
-  toView(obj) {
-    return kendo.stringify(obj);
-  }
-}
-
-export class kendoFormatValueConverter {
-  toView(value, ...params) {
-    params.unshift(value);
-
-    return kendo.format.apply(this, params);
   }
 }

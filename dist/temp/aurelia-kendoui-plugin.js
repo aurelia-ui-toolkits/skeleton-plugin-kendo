@@ -30,11 +30,11 @@ var LogManager = _interopRequireWildcard(_aureliaLogging);
 
 require('jquery');
 
-require('kendo.button.min');
-
 require('kendo.autocomplete.min');
 
 require('kendo.virtuallist.min');
+
+require('kendo.button.min');
 
 require('kendo.dataviz.chart.min');
 
@@ -127,55 +127,8 @@ function configure(aurelia, configCallback) {
   }
 }
 
-var Button = (function () {
-  var _instanceInitializers = {};
-
-  _createDecoratedClass(Button, [{
-    key: 'options',
-    decorators: [_aureliaTemplating.bindable],
-    initializer: function initializer() {
-      return {};
-    },
-    enumerable: true
-  }], null, _instanceInitializers);
-
-  function Button(element, widgetBase) {
-    _classCallCheck(this, _Button);
-
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers);
-
-    this.element = element;
-    this.widgetBase = widgetBase.control('kendoButton').linkViewModel(this);
-  }
-
-  Button.prototype.bind = function bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  };
-
-  Button.prototype.recreate = function recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  };
-
-  Button.prototype.detached = function detached() {
-    this.widgetBase.destroy(this.kWidget);
-  };
-
-  var _Button = Button;
-  Button = _aureliaDependencyInjection.inject(Element, WidgetBase)(Button) || Button;
-  Button = generateBindables('kendoButton')(Button) || Button;
-  Button = _aureliaTemplating.customAttribute(constants.attributePrefix + 'button')(Button) || Button;
-  return Button;
-})();
-
-exports.Button = Button;
-
 var AutoComplete = (function () {
-  var _instanceInitializers2 = {};
+  var _instanceInitializers = {};
 
   _createDecoratedClass(AutoComplete, [{
     key: 'options',
@@ -184,12 +137,12 @@ var AutoComplete = (function () {
       return {};
     },
     enumerable: true
-  }], null, _instanceInitializers2);
+  }], null, _instanceInitializers);
 
   function AutoComplete(element, widgetBase) {
     _classCallCheck(this, _AutoComplete);
 
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers2);
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers);
 
     this.element = element;
     this.widgetBase = widgetBase.control('kendoAutoComplete').linkViewModel(this).useValueBinding();
@@ -224,6 +177,53 @@ var AutoComplete = (function () {
 })();
 
 exports.AutoComplete = AutoComplete;
+
+var Button = (function () {
+  var _instanceInitializers2 = {};
+
+  _createDecoratedClass(Button, [{
+    key: 'options',
+    decorators: [_aureliaTemplating.bindable],
+    initializer: function initializer() {
+      return {};
+    },
+    enumerable: true
+  }], null, _instanceInitializers2);
+
+  function Button(element, widgetBase) {
+    _classCallCheck(this, _Button);
+
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers2);
+
+    this.element = element;
+    this.widgetBase = widgetBase.control('kendoButton').linkViewModel(this);
+  }
+
+  Button.prototype.bind = function bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  };
+
+  Button.prototype.recreate = function recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  };
+
+  Button.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
+  };
+
+  var _Button = Button;
+  Button = _aureliaDependencyInjection.inject(Element, WidgetBase)(Button) || Button;
+  Button = generateBindables('kendoButton')(Button) || Button;
+  Button = _aureliaTemplating.customAttribute(constants.attributePrefix + 'button')(Button) || Button;
+  return Button;
+})();
+
+exports.Button = Button;
 
 var Chart = (function () {
   var _instanceInitializers3 = {};
@@ -971,107 +971,3 @@ var Col = (function () {
 })();
 
 exports.Col = Col;
-
-var kendoToStringValueConverter = (function () {
-  function kendoToStringValueConverter() {
-    _classCallCheck(this, kendoToStringValueConverter);
-  }
-
-  kendoToStringValueConverter.prototype.toView = function toView(value, format, language) {
-    return kendo.toString(value, format, language);
-  };
-
-  return kendoToStringValueConverter;
-})();
-
-exports.kendoToStringValueConverter = kendoToStringValueConverter;
-
-var kendoParseDateValueConverter = (function () {
-  function kendoParseDateValueConverter() {
-    _classCallCheck(this, kendoParseDateValueConverter);
-  }
-
-  kendoParseDateValueConverter.prototype.toView = function toView(value, format, language) {
-    return kendo.parseDate(value, format, language);
-  };
-
-  return kendoParseDateValueConverter;
-})();
-
-exports.kendoParseDateValueConverter = kendoParseDateValueConverter;
-
-var kendoParseIntValueConverter = (function () {
-  function kendoParseIntValueConverter() {
-    _classCallCheck(this, kendoParseIntValueConverter);
-  }
-
-  kendoParseIntValueConverter.prototype.toView = function toView(value, language) {
-    return kendo.parseInt(value, language);
-  };
-
-  return kendoParseIntValueConverter;
-})();
-
-exports.kendoParseIntValueConverter = kendoParseIntValueConverter;
-
-var kendoParseFloatValueConverter = (function () {
-  function kendoParseFloatValueConverter() {
-    _classCallCheck(this, kendoParseFloatValueConverter);
-  }
-
-  kendoParseFloatValueConverter.prototype.toView = function toView(value, language) {
-    return kendo.parseFloat(value, language);
-  };
-
-  return kendoParseFloatValueConverter;
-})();
-
-exports.kendoParseFloatValueConverter = kendoParseFloatValueConverter;
-
-var kendoParseColorValueConverter = (function () {
-  function kendoParseColorValueConverter() {
-    _classCallCheck(this, kendoParseColorValueConverter);
-  }
-
-  kendoParseColorValueConverter.prototype.toView = function toView(value) {
-    return kendo.parseColor(value);
-  };
-
-  return kendoParseColorValueConverter;
-})();
-
-exports.kendoParseColorValueConverter = kendoParseColorValueConverter;
-
-var kendoStringifyValueConverter = (function () {
-  function kendoStringifyValueConverter() {
-    _classCallCheck(this, kendoStringifyValueConverter);
-  }
-
-  kendoStringifyValueConverter.prototype.toView = function toView(obj) {
-    return kendo.stringify(obj);
-  };
-
-  return kendoStringifyValueConverter;
-})();
-
-exports.kendoStringifyValueConverter = kendoStringifyValueConverter;
-
-var kendoFormatValueConverter = (function () {
-  function kendoFormatValueConverter() {
-    _classCallCheck(this, kendoFormatValueConverter);
-  }
-
-  kendoFormatValueConverter.prototype.toView = function toView(value) {
-    for (var _len = arguments.length, params = Array(_len > 1 ? _len - 1 : 0), _key2 = 1; _key2 < _len; _key2++) {
-      params[_key2 - 1] = arguments[_key2];
-    }
-
-    params.unshift(value);
-
-    return kendo.format.apply(this, params);
-  };
-
-  return kendoFormatValueConverter;
-})();
-
-exports.kendoFormatValueConverter = kendoFormatValueConverter;
