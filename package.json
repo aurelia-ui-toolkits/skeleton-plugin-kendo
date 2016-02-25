@@ -2,12 +2,13 @@
   "name": "aurelia-kendoui-plugin",
   "version": "0.3.0",
   "registry": "github",
-  "description": "A set of Telerik KendoUI wrappers used in Aurelia-KendoUI-bridge tutorials",
+  "description": "A set of four Telerik KendoUI wrappers used in Aurelia-KendoUI-bridge tutorials",
   "keywords": [
     "aurelia",
     "plugin",
     "kendo",
     "kendoui",
+    "tutorial",
     "telerik"
   ],
   "homepage": "https://github.com/aurelia-ui-toolkits/skeleton-plugin-kendo",
