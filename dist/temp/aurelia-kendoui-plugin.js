@@ -30,11 +30,11 @@ var LogManager = _interopRequireWildcard(_aureliaLogging);
 
 require('jquery');
 
+require('kendo.button.min');
+
 require('kendo.autocomplete.min');
 
 require('kendo.virtuallist.min');
-
-require('kendo.button.min');
 
 require('kendo.dataviz.chart.min');
 
@@ -72,11 +72,6 @@ var KendoConfigBuilder = (function () {
 
   KendoConfigBuilder.prototype.withoutGlobalResources = function withoutGlobalResources() {
     this.useGlobalResources = false;
-    return this;
-  };
-
-  KendoConfigBuilder.prototype.useValueConverters = function useValueConverters() {
-    this.resources.push('valueconverters/valueconverters');
     return this;
   };
 
@@ -132,10 +127,10 @@ function configure(aurelia, configCallback) {
   }
 }
 
-var AutoComplete = (function () {
+var Button = (function () {
   var _instanceInitializers = {};
 
-  _createDecoratedClass(AutoComplete, [{
+  _createDecoratedClass(Button, [{
     key: 'options',
     decorators: [_aureliaTemplating.bindable],
     initializer: function initializer() {
@@ -144,10 +139,57 @@ var AutoComplete = (function () {
     enumerable: true
   }], null, _instanceInitializers);
 
+  function Button(element, widgetBase) {
+    _classCallCheck(this, _Button);
+
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers);
+
+    this.element = element;
+    this.widgetBase = widgetBase.control('kendoButton').linkViewModel(this);
+  }
+
+  Button.prototype.bind = function bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  };
+
+  Button.prototype.recreate = function recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  };
+
+  Button.prototype.detached = function detached() {
+    this.widgetBase.destroy(this.kWidget);
+  };
+
+  var _Button = Button;
+  Button = _aureliaDependencyInjection.inject(Element, WidgetBase)(Button) || Button;
+  Button = generateBindables('kendoButton')(Button) || Button;
+  Button = _aureliaTemplating.customAttribute(constants.attributePrefix + 'button')(Button) || Button;
+  return Button;
+})();
+
+exports.Button = Button;
+
+var AutoComplete = (function () {
+  var _instanceInitializers2 = {};
+
+  _createDecoratedClass(AutoComplete, [{
+    key: 'options',
+    decorators: [_aureliaTemplating.bindable],
+    initializer: function initializer() {
+      return {};
+    },
+    enumerable: true
+  }], null, _instanceInitializers2);
+
   function AutoComplete(element, widgetBase) {
     _classCallCheck(this, _AutoComplete);
 
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers);
+    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers2);
 
     this.element = element;
     this.widgetBase = widgetBase.control('kendoAutoComplete').linkViewModel(this).useValueBinding();
@@ -182,53 +224,6 @@ var AutoComplete = (function () {
 })();
 
 exports.AutoComplete = AutoComplete;
-
-var Button = (function () {
-  var _instanceInitializers2 = {};
-
-  _createDecoratedClass(Button, [{
-    key: 'options',
-    decorators: [_aureliaTemplating.bindable],
-    initializer: function initializer() {
-      return {};
-    },
-    enumerable: true
-  }], null, _instanceInitializers2);
-
-  function Button(element, widgetBase) {
-    _classCallCheck(this, _Button);
-
-    _defineDecoratedPropertyDescriptor(this, 'options', _instanceInitializers2);
-
-    this.element = element;
-    this.widgetBase = widgetBase.control('kendoButton').linkViewModel(this);
-  }
-
-  Button.prototype.bind = function bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  };
-
-  Button.prototype.recreate = function recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
-  };
-
-  Button.prototype.detached = function detached() {
-    this.widgetBase.destroy(this.kWidget);
-  };
-
-  var _Button = Button;
-  Button = _aureliaDependencyInjection.inject(Element, WidgetBase)(Button) || Button;
-  Button = generateBindables('kendoButton')(Button) || Button;
-  Button = _aureliaTemplating.customAttribute(constants.attributePrefix + 'button')(Button) || Button;
-  return Button;
-})();
-
-exports.Button = Button;
 
 var Chart = (function () {
   var _instanceInitializers3 = {};

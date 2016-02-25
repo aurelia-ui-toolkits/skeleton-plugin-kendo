@@ -35,13 +35,13 @@ export class KendoConfigBuilder {
     return this;
   }
 
-    /**
-  * Registers value converters (wrappers around kendo functions)
-  */
-  useValueConverters(): KendoConfigBuilder {
-    this.resources.push('valueconverters/valueconverters');
-    return this;
-  }
+  //   /**
+  // * Registers value converters (wrappers around kendo functions)
+  // */
+  // useValueConverters(): KendoConfigBuilder {
+  //   this.resources.push('valueconverters/valueconverters');
+  //   return this;
+  // }
 
   /**
   * Adds kendo templating support

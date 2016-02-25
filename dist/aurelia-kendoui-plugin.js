@@ -1,8 +1,8 @@
 import * as LogManager from 'aurelia-logging';
 import 'jquery';
+import 'kendo.button.min';
 import 'kendo.autocomplete.min';
 import 'kendo.virtuallist.min';
-import 'kendo.button.min';
 import 'kendo.dataviz.chart.min';
 import 'kendo.grid.min';
 import {Aurelia} from 'aurelia-framework';
@@ -49,13 +49,13 @@ export class KendoConfigBuilder {
     return this;
   }
 
-    /**
-  * Registers value converters (wrappers around kendo functions)
-  */
-  useValueConverters(): KendoConfigBuilder {
-    this.resources.push('valueconverters/valueconverters');
-    return this;
-  }
+  //   /**
+  // * Registers value converters (wrappers around kendo functions)
+  // */
+  // useValueConverters(): KendoConfigBuilder {
+  //   this.resources.push('valueconverters/valueconverters');
+  //   return this;
+  // }
 
   /**
   * Adds kendo templating support
@@ -109,6 +109,38 @@ export function configure(aurelia: Aurelia, configCallback?: (builder: KendoConf
   }
 }
 
+@customAttribute(`${constants.attributePrefix}button`)
+@generateBindables('kendoButton')
+@inject(Element, WidgetBase)
+export class Button {
+
+  @bindable options = {};
+
+  constructor(element, widgetBase) {
+    this.element = element;
+    this.widgetBase = widgetBase
+                        .control('kendoButton')
+                        .linkViewModel(this);
+  }
+
+  bind(ctx) {
+    this.$parent = ctx;
+
+    this.recreate();
+  }
+
+  recreate() {
+    this.kWidget = this.widgetBase.createWidget({
+      element: this.element,
+      parentCtx: this.$parent
+    });
+  }
+
+  detached() {
+    this.widgetBase.destroy(this.kWidget);
+  }
+}
+
 @customAttribute(`${constants.attributePrefix}autocomplete`)
 @generateBindables('kendoAutoComplete')
 @inject(Element, WidgetBase)
@@ -139,38 +171,6 @@ export class AutoComplete {
 
   propertyChanged(property, newValue, oldValue) {
     this.widgetBase.handlePropertyChanged(this.kWidget, property, newValue, oldValue);
-  }
-
-  detached() {
-    this.widgetBase.destroy(this.kWidget);
-  }
-}
-
-@customAttribute(`${constants.attributePrefix}button`)
-@generateBindables('kendoButton')
-@inject(Element, WidgetBase)
-export class Button {
-
-  @bindable options = {};
-
-  constructor(element, widgetBase) {
-    this.element = element;
-    this.widgetBase = widgetBase
-                        .control('kendoButton')
-                        .linkViewModel(this);
-  }
-
-  bind(ctx) {
-    this.$parent = ctx;
-
-    this.recreate();
-  }
-
-  recreate() {
-    this.kWidget = this.widgetBase.createWidget({
-      element: this.element,
-      parentCtx: this.$parent
-    });
   }
 
   detached() {

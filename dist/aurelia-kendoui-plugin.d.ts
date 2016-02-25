@@ -1,9 +1,9 @@
 declare module 'aurelia-kendoui-plugin' {
   import * as LogManager from 'aurelia-logging';
   import 'jquery';
+  import 'kendo.button.min';
   import 'kendo.autocomplete.min';
   import 'kendo.virtuallist.min';
-  import 'kendo.button.min';
   import 'kendo.dataviz.chart.min';
   import 'kendo.grid.min';
   import { Aurelia }  from 'aurelia-framework';
@@ -36,11 +36,13 @@ declare module 'aurelia-kendoui-plugin' {
       */
     withoutGlobalResources(): KendoConfigBuilder;
     
-    /**
-      * Registers value converters (wrappers around kendo functions)
-      */
-    useValueConverters(): KendoConfigBuilder;
-    
+    //    /**
+    //  * Registers value converters (wrappers around kendo functions)
+    //  */
+    //  useValueConverters(): KendoConfigBuilder {
+    //    this.resources.push('valueconverters/valueconverters');
+    //    return this;
+    //  }
     /**
       * Adds kendo templating support
       */
@@ -51,19 +53,19 @@ declare module 'aurelia-kendoui-plugin' {
     kendoChart(): KendoConfigBuilder;
   }
   export function configure(aurelia: Aurelia, configCallback?: ((builder: KendoConfigBuilder) => void)): any;
+  export class Button {
+    options: any;
+    constructor(element: any, widgetBase: any);
+    bind(ctx: any): any;
+    recreate(): any;
+    detached(): any;
+  }
   export class AutoComplete {
     options: any;
     constructor(element: any, widgetBase: any);
     bind(ctx: any): any;
     recreate(): any;
     propertyChanged(property: any, newValue: any, oldValue: any): any;
-    detached(): any;
-  }
-  export class Button {
-    options: any;
-    constructor(element: any, widgetBase: any);
-    bind(ctx: any): any;
-    recreate(): any;
     detached(): any;
   }
   export class Chart {
